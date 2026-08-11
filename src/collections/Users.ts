@@ -10,7 +10,7 @@ export const Users: CollectionConfig = {
     defaultColumns: ["email", "name", "updatedAt"],
   },
   access: {
-    admin: authenticated,
+    admin: ({ req: { user } }) => Boolean(user),
     create: authenticated,
     delete: authenticated,
     read: authenticated,

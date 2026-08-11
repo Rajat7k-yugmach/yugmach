@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   const tags = body.tags as string[];
   for (const tag of tags) {
-    revalidateTag(tag);
+    revalidateTag(tag, "max");
   }
 
   return NextResponse.json({ ok: true, revalidated: tags });

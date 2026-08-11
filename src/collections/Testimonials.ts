@@ -2,7 +2,16 @@ import type { CollectionConfig } from "payload";
 
 import { anyone } from "@/access/anyone";
 import { authenticated } from "@/access/authenticated";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const Testimonials: CollectionConfig = {
   slug: "testimonials",
@@ -34,8 +43,8 @@ export const Testimonials: CollectionConfig = {
     { name: "isFeatured", type: "checkbox", defaultValue: false },
   ],
   hooks: {
-    afterChange: [() => revalidateContent(["testimonials"])],
-    afterDelete: [() => revalidateContent(["testimonials"])],
+    afterChange: [() => revalidate(["testimonials"])],
+    afterDelete: [() => revalidate(["testimonials"])],
   },
   timestamps: true,
 };

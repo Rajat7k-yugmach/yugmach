@@ -2,7 +2,8 @@ import { Document, Page, StyleSheet, Text, View, renderToBuffer } from "@react-p
 import { NextResponse } from "next/server";
 
 import { getProduct } from "@/lib/api/catalogue";
-import { getSiteSettings, primaryPhone, primaryWhatsApp } from "@/lib/api/siteSettings";
+import { getSiteSettings } from "@/lib/api/getSiteSettings";
+import { primaryPhone, primaryWhatsApp } from "@/lib/api/siteSettings";
 
 export const runtime = "nodejs";
 

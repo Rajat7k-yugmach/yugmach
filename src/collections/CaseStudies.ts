@@ -2,7 +2,16 @@ import type { CollectionConfig } from "payload";
 
 import { authenticated } from "@/access/authenticated";
 import { authenticatedOrPublished } from "@/access/authenticatedOrPublished";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const CaseStudies: CollectionConfig = {
   slug: "case-studies",
@@ -47,9 +56,9 @@ export const CaseStudies: CollectionConfig = {
   hooks: {
     afterChange: [
       ({ doc }) =>
-        revalidateContent(["case-studies", `case-study:${doc.slug}`, "sitemap"]),
+        revalidate(["case-studies", `case-study:${doc.slug}`, "sitemap"]),
     ],
-    afterDelete: [() => revalidateContent(["case-studies", "sitemap"])],
+    afterDelete: [() => revalidate(["case-studies", "sitemap"])],
   },
   timestamps: true,
 };

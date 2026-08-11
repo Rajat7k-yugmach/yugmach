@@ -1,7 +1,16 @@
 import type { CollectionConfig } from "payload";
 
 import { authenticated } from "@/access/authenticated";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const ContactChannels: CollectionConfig = {
   slug: "contact-channels",
@@ -33,8 +42,8 @@ export const ContactChannels: CollectionConfig = {
     { name: "sortOrder", type: "number", defaultValue: 0 },
   ],
   hooks: {
-    afterChange: [() => revalidateContent(["site-settings"])],
-    afterDelete: [() => revalidateContent(["site-settings"])],
+    afterChange: [() => revalidate(["site-settings"])],
+    afterDelete: [() => revalidate(["site-settings"])],
   },
   timestamps: true,
 };

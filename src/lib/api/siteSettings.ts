@@ -1,4 +1,3 @@
-import { getPayload } from "@/lib/payload/getPayload";
 import {
   COMPANY_ADDRESS,
   COMPANY_EMAIL,
@@ -29,7 +28,7 @@ export type SiteSettings = {
   phones: ContactChannel[];
 };
 
-const FALLBACK: SiteSettings = {
+export const SITE_SETTINGS_FALLBACK: SiteSettings = {
   businessHours: "Mon–Sat, 9am–7pm",
   gstin: "",
   showGstin: false,
@@ -61,55 +60,11 @@ const FALLBACK: SiteSettings = {
   ],
 };
 
-export async function getSiteSettings(): Promise<SiteSettings> {
-  try {
-    const payload = await getPayload();
-    const settings = await payload.findGlobal({
-      slug: "site-settings",
-      overrideAccess: true,
-    });
-    const channels = await payload.find({
-      collection: "contact-channels",
-      where: { isActive: { equals: true } },
-      limit: 50,
-      depth: 0,
-      sort: "sortOrder",
-      overrideAccess: true,
-    });
-
-    const mapped: ContactChannel[] = channels.docs.map((c) => ({
-      id: String(c.id),
-      channelType: c.channelType as "whatsapp" | "phone",
-      label: String(c.label),
-      e164: String(c.e164),
-      display: String(c.display),
-      isPrimary: Boolean(c.isPrimary),
-      isActive: Boolean(c.isActive),
-      sortOrder: Number(c.sortOrder ?? 0),
-    }));
-
-    const whatsapp = mapped.filter((c) => c.channelType === "whatsapp");
-    const phones = mapped.filter((c) => c.channelType === "phone");
-
-    return {
-      businessHours: String(settings.businessHours ?? FALLBACK.businessHours),
-      gstin: String(settings.gstin ?? ""),
-      showGstin: Boolean(settings.showGstin),
-      companyEmail: String(settings.companyEmail ?? FALLBACK.companyEmail),
-      companyAddress: String(settings.companyAddress ?? FALLBACK.companyAddress),
-      whatsapp: whatsapp.length ? whatsapp : FALLBACK.whatsapp,
-      phones: phones.length ? phones : FALLBACK.phones,
-    };
-  } catch {
-    return FALLBACK;
-  }
-}
-
 export function primaryWhatsApp(settings: SiteSettings): ContactChannel {
   return (
     settings.whatsapp.find((c) => c.isPrimary) ||
     settings.whatsapp[0] ||
-    FALLBACK.whatsapp[0]
+    SITE_SETTINGS_FALLBACK.whatsapp[0]
   );
 }
 
@@ -117,7 +72,7 @@ export function primaryPhone(settings: SiteSettings): ContactChannel {
   return (
     settings.phones.find((c) => c.isPrimary) ||
     settings.phones[0] ||
-    FALLBACK.phones[0]
+    SITE_SETTINGS_FALLBACK.phones[0]
   );
 }
 

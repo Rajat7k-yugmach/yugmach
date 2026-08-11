@@ -2,7 +2,16 @@ import type { CollectionConfig } from "payload";
 
 import { authenticated } from "@/access/authenticated";
 import { authenticatedOrPublished } from "@/access/authenticatedOrPublished";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const Applications: CollectionConfig = {
   slug: "applications",
@@ -58,14 +67,14 @@ export const Applications: CollectionConfig = {
   hooks: {
     afterChange: [
       ({ doc }) =>
-        revalidateContent([
+        revalidate([
           "applications",
           `application:${doc.slug}`,
           "products",
           "sitemap",
         ]),
     ],
-    afterDelete: [() => revalidateContent(["applications", "products", "sitemap"])],
+    afterDelete: [() => revalidate(["applications", "products", "sitemap"])],
   },
   timestamps: true,
 };

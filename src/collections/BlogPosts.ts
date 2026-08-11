@@ -2,7 +2,16 @@ import type { CollectionConfig } from "payload";
 
 import { authenticated } from "@/access/authenticated";
 import { authenticatedOrPublished } from "@/access/authenticatedOrPublished";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const BlogPosts: CollectionConfig = {
   slug: "blog-posts",
@@ -49,9 +58,9 @@ export const BlogPosts: CollectionConfig = {
   ],
   hooks: {
     afterChange: [
-      ({ doc }) => revalidateContent(["blog", `blog:${doc.slug}`, "sitemap"]),
+      ({ doc }) => revalidate(["blog", `blog:${doc.slug}`, "sitemap"]),
     ],
-    afterDelete: [() => revalidateContent(["blog", "sitemap"])],
+    afterDelete: [() => revalidate(["blog", "sitemap"])],
   },
   timestamps: true,
 };

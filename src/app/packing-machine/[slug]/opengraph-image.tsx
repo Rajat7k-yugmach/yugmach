@@ -1,7 +1,5 @@
 import { ImageResponse } from "next/og";
 
-import { getApplication } from "@/lib/api/catalogue";
-
 export const runtime = "edge";
 export const alt = "YugMach packing machine";
 export const size = { width: 1200, height: 630 };
@@ -11,17 +9,10 @@ type Props = { params: Promise<{ slug: string }> };
 
 export default async function Image({ params }: Props) {
   const { slug } = await params;
-  let name = "Packing machine";
-  let price = "";
-  try {
-    const app = await getApplication(slug);
-    if (app) {
-      name = app.h1 || `${app.name} Packing Machine`;
-      price = app.priceMinDisplay ? `From ${app.priceMinDisplay}` : "";
-    }
-  } catch {
-    /* ignore */
-  }
+  const title = slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 
   return new ImageResponse(
     (
@@ -40,18 +31,18 @@ export default async function Image({ params }: Props) {
         <div style={{ fontSize: 28, fontWeight: 600, color: "#e8890c" }}>YugMach</div>
         <div
           style={{
-            marginTop: 20,
-            fontSize: 54,
-            fontWeight: 700,
-            color: "#ffffff",
-            lineHeight: 1.15,
+            marginTop: 24,
+            fontSize: 56,
+            fontWeight: 800,
+            color: "#f8fafc",
+            lineHeight: 1.1,
             maxWidth: 1000,
           }}
         >
-          {name}
+          {title} Packing Machine
         </div>
-        <div style={{ marginTop: 24, fontSize: 30, color: "#d0d7de" }}>
-          {price || "Published prices · India-wide delivery"}
+        <div style={{ marginTop: 28, fontSize: 28, color: "#94a3b8" }}>
+          Published prices · India-wide delivery
         </div>
       </div>
     ),

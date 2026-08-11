@@ -2,7 +2,16 @@ import type { CollectionConfig } from "payload";
 
 import { anyone } from "@/access/anyone";
 import { authenticated } from "@/access/authenticated";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const FinderSteps: CollectionConfig = {
   slug: "finder-steps",
@@ -44,8 +53,8 @@ export const FinderSteps: CollectionConfig = {
     { name: "isActive", type: "checkbox", defaultValue: true },
   ],
   hooks: {
-    afterChange: [() => revalidateContent(["finder-steps"])],
-    afterDelete: [() => revalidateContent(["finder-steps"])],
+    afterChange: [() => revalidate(["finder-steps"])],
+    afterDelete: [() => revalidate(["finder-steps"])],
   },
   timestamps: true,
 };

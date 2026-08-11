@@ -2,7 +2,16 @@ import type { CollectionConfig } from "payload";
 
 import { anyone } from "@/access/anyone";
 import { authenticated } from "@/access/authenticated";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const Redirects: CollectionConfig = {
   slug: "redirects",
@@ -23,8 +32,8 @@ export const Redirects: CollectionConfig = {
     { name: "hits", type: "number", defaultValue: 0 },
   ],
   hooks: {
-    afterChange: [() => revalidateContent(["seo-redirects"])],
-    afterDelete: [() => revalidateContent(["seo-redirects"])],
+    afterChange: [() => revalidate(["seo-redirects"])],
+    afterDelete: [() => revalidate(["seo-redirects"])],
   },
   timestamps: true,
 };

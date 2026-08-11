@@ -6,7 +6,7 @@ import { OrganizationJsonLd } from "@/components/OrganizationJsonLd";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteSettingsProvider } from "@/components/SiteSettingsProvider";
-import { getSiteSettings } from "@/lib/api/siteSettings";
+import { getSiteSettings } from "@/lib/api/getSiteSettings";
 import { cn } from "@/lib/utils";
 
 import "./globals.css";

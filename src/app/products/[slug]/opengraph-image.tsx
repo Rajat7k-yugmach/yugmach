@@ -1,7 +1,5 @@
 import { ImageResponse } from "next/og";
 
-import { getProduct } from "@/lib/api/catalogue";
-
 export const runtime = "edge";
 export const alt = "YugMach packing machine";
 export const size = { width: 1200, height: 630 };
@@ -9,9 +7,10 @@ export const contentType = "image/png";
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = await getProduct(slug).catch(() => null);
-  const name = product?.name ?? "Packing machine";
-  const price = product?.priceDisplay ?? "Price on request";
+  const name = slug
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
 
   return new ImageResponse(
     (
@@ -43,7 +42,9 @@ export default async function Image({ params }: { params: Promise<{ slug: string
         >
           {name}
         </div>
-        <div style={{ marginTop: 28, fontSize: 44, fontWeight: 600, color: "#e8890c" }}>{price}</div>
+        <div style={{ marginTop: 28, fontSize: 44, fontWeight: 600, color: "#e8890c" }}>
+          Price on request
+        </div>
         <div style={{ marginTop: 24, fontSize: 24, color: "#c7ccd4" }}>
           India-wide delivery · GST extra · WhatsApp for a video demo
         </div>

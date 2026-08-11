@@ -1,7 +1,15 @@
 import type { GlobalConfig } from "payload";
 
 import { authenticated } from "@/access/authenticated";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidateContent(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
 
 export const SiteSettings: GlobalConfig = {
   slug: "site-settings",
@@ -29,6 +37,6 @@ export const SiteSettings: GlobalConfig = {
     },
   ],
   hooks: {
-    afterChange: [() => revalidateContent(["site-settings"])],
+    afterChange: [() => revalidate(["site-settings"])],
   },
 };

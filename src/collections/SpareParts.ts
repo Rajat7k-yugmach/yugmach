@@ -2,7 +2,16 @@ import type { CollectionConfig } from "payload";
 
 import { authenticated } from "@/access/authenticated";
 import { authenticatedOrPublished } from "@/access/authenticatedOrPublished";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const SpareParts: CollectionConfig = {
   slug: "spare-parts",
@@ -41,8 +50,8 @@ export const SpareParts: CollectionConfig = {
     },
   ],
   hooks: {
-    afterChange: [() => revalidateContent(["spare-parts"])],
-    afterDelete: [() => revalidateContent(["spare-parts"])],
+    afterChange: [() => revalidate(["spare-parts"])],
+    afterDelete: [() => revalidate(["spare-parts"])],
   },
   timestamps: true,
 };

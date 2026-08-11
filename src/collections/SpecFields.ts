@@ -2,7 +2,16 @@ import type { CollectionConfig } from "payload";
 
 import { authenticated } from "@/access/authenticated";
 import { authenticatedOrPublished } from "@/access/authenticatedOrPublished";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const SpecFields: CollectionConfig = {
   slug: "spec-fields",
@@ -75,8 +84,8 @@ export const SpecFields: CollectionConfig = {
     { name: "isActive", type: "checkbox", defaultValue: true },
   ],
   hooks: {
-    afterChange: [() => revalidateContent(["spec-fields", "products"])],
-    afterDelete: [() => revalidateContent(["spec-fields", "products"])],
+    afterChange: [() => revalidate(["spec-fields", "products"])],
+    afterDelete: [() => revalidate(["spec-fields", "products"])],
   },
   timestamps: true,
 };

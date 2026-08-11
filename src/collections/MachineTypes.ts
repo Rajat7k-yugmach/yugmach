@@ -3,7 +3,16 @@ import type { CollectionConfig } from "payload";
 import { anyone } from "@/access/anyone";
 import { authenticated } from "@/access/authenticated";
 import { authenticatedOrPublished } from "@/access/authenticatedOrPublished";
-import { revalidateContent } from "@/lib/payload/revalidate";
+
+async function revalidate(tags: string[]) {
+  try {
+    const { revalidateContent } = await import("@/lib/payload/revalidate");
+    revalidate(tags);
+  } catch {
+    // ignore outside Next.js
+  }
+}
+
 
 export const MachineTypes: CollectionConfig = {
   slug: "machine-types",
@@ -38,8 +47,8 @@ export const MachineTypes: CollectionConfig = {
     },
   ],
   hooks: {
-    afterChange: [() => revalidateContent(["machine-types", "products", "sitemap"])],
-    afterDelete: [() => revalidateContent(["machine-types", "products", "sitemap"])],
+    afterChange: [() => revalidate(["machine-types", "products", "sitemap"])],
+    afterDelete: [() => revalidate(["machine-types", "products", "sitemap"])],
   },
   timestamps: true,
 };

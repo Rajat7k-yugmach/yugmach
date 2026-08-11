@@ -1,7 +1,7 @@
+export type { LeadPayload } from "./leads";
 export type {
   Application,
   Industry,
-  LeadPayload,
   MachineType,
   ProductDetail,
   ProductListItem,
