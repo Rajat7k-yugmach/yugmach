@@ -3,8 +3,7 @@ import { Inter, Manrope } from "next/font/google";
 
 import { CookieConsent } from "@/components/CookieConsent";
 import { OrganizationJsonLd } from "@/components/OrganizationJsonLd";
-import { SiteFooter } from "@/components/SiteFooter";
-import { SiteHeader } from "@/components/SiteHeader";
+import { AppShell } from "@/components/AppShell";
 import { SiteSettingsProvider } from "@/components/SiteSettingsProvider";
 import { getSiteSettings } from "@/lib/api/getSiteSettings";
 import { cn } from "@/lib/utils";
@@ -87,10 +86,7 @@ export default async function RootLayout({
       <body className="flex min-h-screen flex-col antialiased">
         <SiteSettingsProvider value={settings}>
           <OrganizationJsonLd settings={settings} />
-          <SiteHeader />
-          <div className="flex-1 pb-24 md:pb-0">{children}</div>
-          <SiteFooter />
-          <CookieConsent />
+          <AppShell>{children}</AppShell>
         </SiteSettingsProvider>
       </body>
     </html>

@@ -31,6 +31,11 @@ const dirname = path.dirname(filename);
 export default buildConfig({
   admin: {
     user: Users.slug,
+    // Lock admin to light theme (OS dark mode was making inputs/panels near-black)
+    theme: "light",
+    meta: {
+      titleSuffix: "— YugMach Admin",
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
