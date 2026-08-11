@@ -10,7 +10,8 @@
     "payload": "payload",
     "migrate:django": "node --import tsx scripts/migrate-from-django.ts",
     "generate:types": "payload generate:types",
-    "generate:importmap": "payload generate:importmap"
+    "generate:importmap": "payload generate:importmap",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -29,7 +30,7 @@
     "graphql": "^16.14.2",
     "lucide-react": "^1.30.0",
     "motion": "^12.43.0",
-    "next": "15.4.11",
+    "next": "16.3.0",
     "payload": "^3.87.1",
     "pg": "^8.23.0",
     "react": "19.1.0",
@@ -48,7 +49,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "15.4.11",
+    "eslint-config-next": "16.3.0",
+    "patch-package": "^8.0.1",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
     "typescript": "^5"

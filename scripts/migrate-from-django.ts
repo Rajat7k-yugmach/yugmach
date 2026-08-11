@@ -345,7 +345,9 @@ async function main() {
         authorName: String(row.author_name || "YugMach"),
         readingMins: Number(row.reading_mins || 5),
         status: statusMap(row.status),
-        publishedAt: row.published_at ? String(row.published_at) : undefined,
+        publishedAt: row.published_at
+          ? new Date(String(row.published_at)).toISOString()
+          : undefined,
       },
       overrideAccess: true,
     });
@@ -525,21 +527,32 @@ async function main() {
         product: row.product_id
           ? idMaps.products.get(String(row.product_id))
           : undefined,
-        source: (String(row.source || "WEBSITE_FORM") as
+        source: (["WEBSITE_FORM","QUOTE_FLOW","WHATSAPP","PHONE","MACHINE_FINDER","SUBSIDY_CALC","EMI_CALC","SPEC_DOWNLOAD","REFERRAL","INDIAMART","OTHER"].includes(String(row.source))
+          ? String(row.source)
+          : "OTHER") as
           | "WEBSITE_FORM"
           | "QUOTE_FLOW"
           | "WHATSAPP"
-          | "INDIAMART"
           | "PHONE"
-          | "OTHER"),
+          | "MACHINE_FINDER"
+          | "SUBSIDY_CALC"
+          | "EMI_CALC"
+          | "SPEC_DOWNLOAD"
+          | "REFERRAL"
+          | "INDIAMART"
+          | "OTHER",
         sourcePage: String(row.source_page || ""),
-        status: (String(row.status || "NEW") as
+        status: (["NEW","CONTACTED","QUALIFIED","QUOTED","NEGOTIATING","WON","LOST","SPAM"].includes(String(row.status))
+          ? String(row.status)
+          : "NEW") as
           | "NEW"
           | "CONTACTED"
           | "QUALIFIED"
           | "QUOTED"
+          | "NEGOTIATING"
           | "WON"
-          | "LOST"),
+          | "LOST"
+          | "SPAM",
         quotedAmountPaise:
           row.quoted_amount_paise != null
             ? Number(row.quoted_amount_paise)
