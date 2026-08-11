@@ -1,0 +1,26 @@
+name: Frontend CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true
+      - name: Build
+        env:
+          PAYLOAD_SECRET: ci-build-secret-not-for-production
+          POSTGRES_URL: postgresql://user:pass@127.0.0.1:5432/yugmach
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+        run: npm run build

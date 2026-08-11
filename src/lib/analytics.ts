@@ -1,0 +1,35 @@
+import { hasAnalyticsConsent } from "@/components/CookieConsent";
+
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
+  }
+}
+
+function ensureGtag() {
+  const id = process.env.NEXT_PUBLIC_GA_ID;
+  if (!id || typeof window === "undefined") return false;
+  if (!hasAnalyticsConsent()) return false;
+  if (typeof window.gtag === "function") return true;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag(...args: unknown[]) {
+    window.dataLayer?.push(args);
+  };
+  const s = document.createElement("script");
+  s.async = true;
+  s.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
+  document.head.appendChild(s);
+  window.gtag("js", new Date());
+  window.gtag("config", id);
+  return true;
+}
+
+export function trackEvent(name: string, params?: Record<string, string | number | boolean>) {
+  if (typeof window === "undefined") return;
+  if (ensureGtag()) {
+    window.gtag?.("event", name, params ?? {});
+  } else if (process.env.NODE_ENV === "development") {
+    console.info("[analytics]", name, params ?? {});
+  }
+}

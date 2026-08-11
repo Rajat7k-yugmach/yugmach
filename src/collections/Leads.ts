@@ -1,0 +1,95 @@
+import type { CollectionConfig } from "payload";
+
+import { authenticated } from "@/access/authenticated";
+
+export const Leads: CollectionConfig = {
+  slug: "leads",
+  admin: {
+    useAsTitle: "name",
+    defaultColumns: ["name", "phone", "source", "status", "createdAt"],
+  },
+  access: {
+    create: () => true,
+    delete: authenticated,
+    read: authenticated,
+    update: authenticated,
+  },
+  fields: [
+    { name: "name", type: "text", required: true },
+    { name: "phone", type: "text", required: true },
+    { name: "email", type: "email" },
+    { name: "company", type: "text" },
+    { name: "city", type: "text" },
+    { name: "state", type: "text" },
+    { name: "message", type: "textarea" },
+    { name: "productToPack", type: "text" },
+    { name: "requiredPph", type: "number" },
+    { name: "pouchSizeRange", type: "text" },
+    { name: "budgetBand", type: "text" },
+    { name: "timeline", type: "text" },
+    { name: "needsFinance", type: "checkbox", defaultValue: false },
+    { name: "needsSubsidyHelp", type: "checkbox", defaultValue: false },
+    {
+      name: "product",
+      type: "relationship",
+      relationTo: "products",
+    },
+    {
+      name: "interestedProducts",
+      type: "relationship",
+      relationTo: "products",
+      hasMany: true,
+    },
+    {
+      name: "source",
+      type: "select",
+      defaultValue: "WEBSITE_FORM",
+      options: [
+        { label: "Website form", value: "WEBSITE_FORM" },
+        { label: "Quote flow", value: "QUOTE_FLOW" },
+        { label: "WhatsApp", value: "WHATSAPP" },
+        { label: "IndiaMART", value: "INDIAMART" },
+        { label: "Phone", value: "PHONE" },
+        { label: "Other", value: "OTHER" },
+      ],
+    },
+    { name: "sourcePage", type: "text" },
+    { name: "referrer", type: "text" },
+    { name: "utmSource", type: "text" },
+    { name: "utmMedium", type: "text" },
+    { name: "utmCampaign", type: "text" },
+    { name: "utmTerm", type: "text" },
+    { name: "utmContent", type: "text" },
+    { name: "device", type: "text" },
+    { name: "ipCountry", type: "text" },
+    {
+      name: "status",
+      type: "select",
+      defaultValue: "NEW",
+      options: [
+        { label: "New", value: "NEW" },
+        { label: "Contacted", value: "CONTACTED" },
+        { label: "Qualified", value: "QUALIFIED" },
+        { label: "Quoted", value: "QUOTED" },
+        { label: "Won", value: "WON" },
+        { label: "Lost", value: "LOST" },
+      ],
+    },
+    {
+      name: "assignedTo",
+      type: "relationship",
+      relationTo: "users",
+    },
+    { name: "quotedAmountPaise", type: "number" },
+    { name: "lostReason", type: "text" },
+    {
+      name: "notes",
+      type: "array",
+      fields: [
+        { name: "body", type: "textarea", required: true },
+        { name: "authorEmail", type: "text" },
+      ],
+    },
+  ],
+  timestamps: true,
+};
