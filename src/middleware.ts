@@ -56,8 +56,16 @@ async function loadRedirects(): Promise<RedirectRule[]> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip Payload admin + API noise
-  if (pathname.startsWith("/admin") || pathname.startsWith("/api/")) {
+  // Payload admin: skip redirects and mark route so root layout does not wrap admin
+  if (pathname.startsWith("/admin")) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-payload-admin", "1");
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
+  }
+
+  if (pathname.startsWith("/api/")) {
     return NextResponse.next();
   }
 

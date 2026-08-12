@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Inter, Manrope } from "next/font/google";
 
 import { OrganizationJsonLd } from "@/components/OrganizationJsonLd";
@@ -78,6 +79,13 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const isPayloadAdmin = (await headers()).get("x-payload-admin") === "1";
+
+  // Payload RootLayout renders its own <html>/<body>; avoid nested documents.
+  if (isPayloadAdmin) {
+    return children;
+  }
+
   const settings = await getSiteSettings();
 
   return (
