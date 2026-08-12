@@ -8,9 +8,9 @@ import { getCaseStudies } from "@/lib/api/catalogue";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Case studies — packing machine buyers",
+  title: "Case studies - packing machine buyers",
   description:
-    "How manufacturers use YugMach packing machines — results from real floors.",
+    "How manufacturers use YugMach packing machines - results from real floors.",
   path: "/case-studies",
   withHreflang: false,
 });
@@ -29,7 +29,7 @@ export default async function CaseStudiesPage() {
           Case studies
         </h1>
         <p className="mt-3 text-ink-muted">
-          Short stories from buyers — what they packed, what changed, and the
+          Short stories from buyers - what they packed, what changed, and the
           result on the floor.
         </p>
       </div>

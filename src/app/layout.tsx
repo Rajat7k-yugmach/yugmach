@@ -4,6 +4,7 @@ import { Inter, Manrope } from "next/font/google";
 
 import { OrganizationJsonLd } from "@/components/OrganizationJsonLd";
 import { AppShell } from "@/components/AppShell";
+import { NavigationProgress } from "@/components/NavigationProgress";
 import { SiteSettingsProvider } from "@/components/SiteSettingsProvider";
 import { getSiteSettings } from "@/lib/api/getSiteSettings";
 import { cn } from "@/lib/utils";
@@ -92,6 +93,7 @@ export default async function RootLayout({
     <html lang="en-IN" className={cn(inter.variable, manrope.variable, "font-sans")}>
       <body className="flex min-h-screen flex-col antialiased">
         <SiteSettingsProvider value={settings}>
+          <NavigationProgress />
           <OrganizationJsonLd settings={settings} />
           <AppShell>{children}</AppShell>
         </SiteSettingsProvider>

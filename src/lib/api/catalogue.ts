@@ -666,7 +666,7 @@ export async function getBlogPosts() {
     collection: "blog-posts",
     where: { status: { equals: "published" } },
     limit: 100,
-    depth: 0,
+    depth: 1,
     sort: "-publishedAt",
     overrideAccess: true,
   });
@@ -679,6 +679,14 @@ export async function getBlogPosts() {
     readingMins: Number(doc.readingMins ?? 5),
     publishedAt: doc.publishedAt ? String(doc.publishedAt) : null,
     tags: Array.isArray(doc.tags) ? (doc.tags as string[]) : [],
+    coverImage: (() => {
+      const media = doc.coverMedia;
+      if (media && typeof media === "object" && "url" in media && typeof media.url === "string") {
+        return media.url;
+      }
+      return doc.coverImage ? String(doc.coverImage) : null;
+    })(),
+    coverImageAlt: doc.coverImageAlt ? String(doc.coverImageAlt) : undefined,
   }));
 }
 
@@ -811,11 +819,23 @@ export async function getCaseStudy(slug: string) {
       and: [{ slug: { equals: slug } }, { status: { equals: "published" } }],
     },
     limit: 1,
-    depth: 0,
+    depth: 1,
     overrideAccess: true,
   });
   const doc = result.docs[0];
   if (!doc) return null;
+
+  const products = Array.isArray(doc.products)
+    ? doc.products
+        .filter((p): p is Record<string, unknown> => typeof p === "object" && p !== null && "slug" in p)
+        .map((p) => mapProductListItem(p))
+    : [];
+
+  const metrics =
+    doc.metrics && typeof doc.metrics === "object" && !Array.isArray(doc.metrics)
+      ? (doc.metrics as Record<string, unknown>)
+      : {};
+
   return {
     slug: String(doc.slug),
     customerName: String(doc.customerName),
@@ -824,6 +844,9 @@ export async function getCaseStudy(slug: string) {
     challenge: String(doc.challenge),
     solution: String(doc.solution),
     results: String(doc.results),
+    metrics,
+    videoId: doc.videoId ? String(doc.videoId) : undefined,
+    products,
   };
 }
 
