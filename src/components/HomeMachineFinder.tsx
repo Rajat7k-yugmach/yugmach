@@ -123,12 +123,14 @@ function FinderCombobox({
   placeholder,
   highlighted,
   onSelect,
+  testIdPrefix = "machine-finder",
 }: {
   options: FinderOption[];
   value: string;
   placeholder: string;
   highlighted?: boolean;
   onSelect: (id: string) => void;
+  testIdPrefix?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [canScrollMore, setCanScrollMore] = useState(false);
@@ -156,6 +158,7 @@ function FinderCombobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         type="button"
+        data-testid={`${testIdPrefix}-combobox-trigger`}
         className={cn(
           "flex w-full min-w-0 items-center justify-between gap-2 border border-border bg-white px-3.5 text-left font-medium text-ink shadow-sm outline-none transition",
           "hover:border-ink/25 focus-visible:border-amber focus-visible:ring-3 focus-visible:ring-amber/20",
@@ -181,6 +184,7 @@ function FinderCombobox({
         <Command className="rounded-xl bg-white text-ink">
           <CommandInput
             placeholder="Search options…"
+            data-testid={`${testIdPrefix}-combobox-search`}
             className="h-10 text-base text-ink placeholder:text-ink-muted"
             onValueChange={() => {
               requestAnimationFrame(updateScrollHint);
@@ -234,6 +238,7 @@ function FinderCombobox({
             </p>
             <button
               type="button"
+              data-testid={`${testIdPrefix}-combobox-other`}
               onClick={() => {
                 onSelect(FINDER_OTHER_ID);
                 setOpen(false);
@@ -257,11 +262,13 @@ function OtherDetailInput({
   onChange,
   placeholder,
   highlighted,
+  testId = "machine-finder-other-detail",
 }: {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
   highlighted?: boolean;
+  testId?: string;
 }) {
   return (
     <Input
@@ -269,6 +276,7 @@ function OtherDetailInput({
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
       autoFocus
+      data-testid={testId}
       className={cn(
         "mt-2.5 border-border bg-white text-ink shadow-sm placeholder:text-ink-muted",
         "focus-visible:border-amber focus-visible:ring-amber/20",
@@ -382,6 +390,7 @@ export function HomeMachineFinder({
         e.preventDefault();
         if (canContinue) goNext();
       }}
+      data-testid="machine-finder-form"
       className={`relative overflow-hidden bg-white text-ink ${
         highlighted
           ? "rounded-2xl border border-border bg-white shadow-[0_12px_36px_rgba(15,23,42,0.07)]"
@@ -452,6 +461,7 @@ export function HomeMachineFinder({
                 placeholder={selectPlaceholder}
                 highlighted={highlighted}
                 onSelect={(id) => setAnswer(current.key, id)}
+                testIdPrefix={`machine-finder-${current.key}`}
               />
               {isOther ? (
                 <OtherDetailInput
@@ -459,6 +469,7 @@ export function HomeMachineFinder({
                   onChange={(v) => setOtherDetail(current.key, v)}
                   placeholder={otherPlaceholder}
                   highlighted={highlighted}
+                  testId={`machine-finder-${current.key}-other-detail`}
                 />
               ) : null}
             </>
@@ -472,6 +483,7 @@ export function HomeMachineFinder({
                     <button
                       key={o.id}
                       type="button"
+                      data-testid={`machine-finder-${current.key}-option-${o.id}`}
                       onClick={() => {
                         setAnswer(current.key, o.id);
                         if (!isOtherChip) {
@@ -501,6 +513,7 @@ export function HomeMachineFinder({
                   onChange={(v) => setOtherDetail(current.key, v)}
                   placeholder={otherPlaceholder}
                   highlighted={highlighted}
+                  testId={`machine-finder-${current.key}-other-detail`}
                 />
               ) : null}
             </>
@@ -513,6 +526,7 @@ export function HomeMachineFinder({
           <button
             type="button"
             onClick={goBack}
+            data-testid="machine-finder-back"
             className="tap-target inline-flex items-center justify-center gap-1 rounded-xl border border-border bg-white px-4 py-3 text-sm font-semibold text-ink hover:bg-surface-sunken"
           >
             <ChevronLeft className="size-4" aria-hidden />
@@ -522,6 +536,7 @@ export function HomeMachineFinder({
         <button
           type="submit"
           disabled={!canContinue}
+          data-testid="machine-finder-continue"
           className={`tap-target group inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber font-semibold text-white shadow-[0_8px_22px_rgba(249,115,22,0.25)] transition hover:bg-amber-hover disabled:opacity-45 ${
             highlighted
               ? "px-4 py-3.5 text-base md:py-4 md:text-lg"
@@ -567,6 +582,7 @@ export function HomeMachineFinder({
 
       <Link
         href="/advisor"
+        data-testid="machine-finder-advisor-link"
         className="mt-4 flex items-center justify-center gap-1.5 text-center text-sm font-semibold text-trust transition hover:text-ink"
       >
         <Compass className="size-3.5" aria-hidden />

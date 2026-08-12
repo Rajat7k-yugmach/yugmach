@@ -286,6 +286,7 @@ export default async function ProductPage({ params }: Props) {
                   <WhatsAppButton
                     message={wa}
                     placement="price"
+                    data-testid="product-primary-whatsapp"
                     className="tap-target inline-flex w-full items-center justify-center rounded-md bg-whatsapp px-5 py-3 font-semibold text-white"
                   >
                     Get Price on WhatsApp
@@ -293,6 +294,7 @@ export default async function ProductPage({ params }: Props) {
                   <div className="grid grid-cols-2 gap-2">
                     <a
                       href={apiUrl(`/api/v1/products/${product.slug}/spec-sheet.pdf`)}
+                      data-testid="product-spec-sheet"
                       className="tap-target inline-flex items-center justify-center gap-1.5 rounded-md border border-border px-3 py-2.5 text-sm font-semibold"
                       target="_blank"
                       rel="noopener noreferrer"
@@ -303,6 +305,7 @@ export default async function ProductPage({ params }: Props) {
                     <WhatsAppButton
                       message={`${wa} I need a demo video with my material.`}
                       placement="hero"
+                      data-testid="product-request-demo-top"
                       className="tap-target inline-flex items-center justify-center rounded-md border border-border px-3 py-2.5 text-sm font-semibold"
                     >
                       Request demo
@@ -326,6 +329,7 @@ export default async function ProductPage({ params }: Props) {
             <WhatsAppButton
               message={`${wa} Please confirm if these specs fit my product.`}
               placement="spec_table"
+              data-testid="product-specs-whatsapp"
               className="text-sm font-semibold text-trust underline"
             >
               Ask if this fits →
@@ -372,6 +376,7 @@ export default async function ProductPage({ params }: Props) {
             <WhatsAppButton
               message={`${wa} I need a demo video with my material.`}
               placement="hero"
+              data-testid="product-request-demo-main"
               className="tap-target mt-4 inline-flex w-full items-center justify-center rounded-md bg-whatsapp px-4 py-3 text-sm font-semibold text-white"
             >
               Request demo with your material

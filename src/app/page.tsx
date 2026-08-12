@@ -177,6 +177,7 @@ export default async function HomePage() {
                 <WhatsAppButton
                   message={waMessageGeneric()}
                   placement="hero"
+                  data-testid="home-hero-whatsapp"
                   className="tap-target inline-flex items-center justify-center rounded-lg bg-whatsapp px-5 py-3 text-sm font-bold text-white"
                 >
                   Get Price on WhatsApp

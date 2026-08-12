@@ -45,6 +45,7 @@ export function ContactPageClient() {
         <WhatsAppButton
           message="Hi, mujhe packing machine ka price chahiye"
           placement="hero"
+          data-testid="contact-whatsapp"
           className="tap-target rounded-md bg-whatsapp px-5 py-3 font-semibold text-white"
         >
           Get Price on WhatsApp

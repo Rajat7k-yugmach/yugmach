@@ -11,6 +11,7 @@ type Props = {
   children: React.ReactNode;
   className?: string;
   "aria-label"?: string;
+  "data-testid"?: string;
 };
 
 export function WhatsAppButton({
@@ -19,6 +20,7 @@ export function WhatsAppButton({
   children,
   className,
   "aria-label": ariaLabel,
+  "data-testid": dataTestId,
 }: Props) {
   const settings = useSiteSettings();
   const wa = primaryWhatsApp(settings);
@@ -28,6 +30,7 @@ export function WhatsAppButton({
       href={whatsappUrl(message, waE164(wa))}
       className={className}
       aria-label={ariaLabel ?? "Get Price on WhatsApp"}
+      data-testid={dataTestId}
       rel="noopener noreferrer"
       target="_blank"
       onClick={() =>

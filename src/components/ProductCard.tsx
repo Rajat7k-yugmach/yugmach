@@ -30,8 +30,15 @@ export function ProductCard({ product, hrefPrefix = "/products" }: Props) {
   const mt = mtSlug(product);
 
   return (
-    <article className="card-elevated group flex h-full flex-col overflow-hidden transition-[border-color] duration-[var(--dur-fast)] hover:border-border-strong">
-      <Link href={`${hrefPrefix}/${product.slug}`} className="block shrink-0">
+    <article
+      className="card-elevated group flex h-full flex-col overflow-hidden transition-[border-color] duration-[var(--dur-fast)] hover:border-border-strong"
+      data-testid={`product-card-${product.slug}`}
+    >
+      <Link
+        href={`${hrefPrefix}/${product.slug}`}
+        className="block shrink-0"
+        data-testid={`product-card-link-${product.slug}`}
+      >
         <MachineImage
           image={product.primaryImage}
           name={product.name}
@@ -45,6 +52,7 @@ export function ProductCard({ product, hrefPrefix = "/products" }: Props) {
           <Link
             href={`${hrefPrefix}/${product.slug}`}
             className="line-clamp-2 text-base font-semibold leading-snug text-ink group-hover:underline md:text-lg"
+            data-testid={`product-card-title-${product.slug}`}
           >
             {product.name}
           </Link>
@@ -60,12 +68,14 @@ export function ProductCard({ product, hrefPrefix = "/products" }: Props) {
           <Link
             href={`${hrefPrefix}/${product.slug}`}
             className="tap-target flex flex-1 items-center justify-center rounded-md border border-border bg-white px-3 py-2 text-sm font-semibold"
+            data-testid={`product-card-specs-${product.slug}`}
           >
             Specs
           </Link>
           <WhatsAppButton
             message={`Hi, I need the price and details for ${product.name}.`}
             placement="product_card"
+            data-testid={`product-card-whatsapp-${product.slug}`}
             className="tap-target flex flex-1 items-center justify-center rounded-md bg-whatsapp px-3 py-2 text-sm font-semibold text-white"
           >
             WhatsApp

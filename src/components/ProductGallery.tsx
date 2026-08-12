@@ -20,8 +20,11 @@ export function ProductGallery({ name, images, capacityHint, machineType }: Prop
   const current = list[Math.min(active, list.length - 1)];
 
   return (
-    <div>
-      <div className="overflow-hidden rounded-xl border border-border bg-surface-sunken">
+    <div data-testid="product-gallery">
+      <div
+        className="overflow-hidden rounded-xl border border-border bg-surface-sunken"
+        data-testid="product-gallery-main"
+      >
         <MachineImage
           image={current?.url ? current : null}
           name={name}
@@ -39,6 +42,7 @@ export function ProductGallery({ name, images, capacityHint, machineType }: Prop
               <button
                 type="button"
                 onClick={() => setActive(i)}
+                data-testid={`product-gallery-thumb-${i}`}
                 className={`block w-full overflow-hidden rounded-lg border bg-surface-sunken transition-colors ${
                   i === active ? "border-amber ring-2 ring-amber/30" : "border-border hover:border-border-strong"
                 }`}

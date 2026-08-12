@@ -23,12 +23,14 @@ export function StickyCtaBar({ message, whatsappMessage }: Props) {
         <WhatsAppButton
           message={wa}
           placement="sticky"
+          data-testid="sticky-cta-whatsapp"
           className="tap-target flex items-center justify-center rounded-md bg-whatsapp px-2 text-center text-sm font-semibold text-white"
         >
           Price
         </WhatsAppButton>
         <a
           href={`tel:${telHref(phone)}`}
+          data-testid="sticky-cta-call"
           className="tap-target flex items-center justify-center rounded-md border border-border px-2 text-center text-sm font-semibold text-ink"
           aria-label={`Call ${phone.display}`}
         >
@@ -36,6 +38,7 @@ export function StickyCtaBar({ message, whatsappMessage }: Props) {
         </a>
         <Link
           href="/about/factory"
+          data-testid="sticky-cta-visit"
           className="tap-target flex items-center justify-center rounded-md bg-amber px-2 text-center text-sm font-semibold text-amber-ink"
         >
           Visit

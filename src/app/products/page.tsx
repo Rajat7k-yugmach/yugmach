@@ -40,10 +40,15 @@ export default async function ProductsPage({ searchParams }: Props) {
         Published configuration prices. GST extra. Final figure follows pouch, film and options.
       </p>
 
-      <form className="mt-6 flex flex-wrap gap-3" method="get">
+      <form className="mt-6 flex flex-wrap gap-3" method="get" data-testid="products-filter-form">
         <label className="text-sm">
           Application
-          <select name="application" defaultValue={application || ""} className="ml-2 rounded-lg border border-border bg-surface-raised px-3 py-2">
+          <select
+            name="application"
+            defaultValue={application || ""}
+            data-testid="products-filter-application"
+            className="ml-2 rounded-lg border border-border bg-surface-raised px-3 py-2"
+          >
             <option value="">All</option>
             {apps.map((a) => (
               <option key={a.slug} value={a.slug}>{a.name}</option>
@@ -52,18 +57,27 @@ export default async function ProductsPage({ searchParams }: Props) {
         </label>
         <label className="text-sm">
           Type
-          <select name="machine_type" defaultValue={machineType || ""} className="ml-2 rounded-lg border border-border bg-surface-raised px-3 py-2">
+          <select
+            name="machine_type"
+            defaultValue={machineType || ""}
+            data-testid="products-filter-machine-type"
+            className="ml-2 rounded-lg border border-border bg-surface-raised px-3 py-2"
+          >
             <option value="">All</option>
             {types.map((t) => (
               <option key={t.slug} value={t.slug}>{t.name}</option>
             ))}
           </select>
         </label>
-        <button type="submit" className="rounded-lg bg-amber px-4 py-2 text-sm font-semibold text-amber-ink">
+        <button
+          type="submit"
+          data-testid="products-filter-submit"
+          className="rounded-lg bg-amber px-4 py-2 text-sm font-semibold text-amber-ink"
+        >
           Filter
         </button>
         {(application || machineType) ? (
-          <Link href="/products" className="self-center text-sm underline">Clear</Link>
+          <Link href="/products" data-testid="products-filter-clear" className="self-center text-sm underline">Clear</Link>
         ) : null}
       </form>
 

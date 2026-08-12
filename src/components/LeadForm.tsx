@@ -62,6 +62,7 @@ export function LeadForm({
         </p>
         <button
           type="button"
+          data-testid="lead-form-reset"
           className="mt-4 text-sm text-info underline"
           onClick={() => setStatus("idle")}
         >
@@ -72,16 +73,30 @@ export function LeadForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="border border-border bg-surface-raised p-5">
+    <form
+      onSubmit={onSubmit}
+      className="border border-border bg-surface-raised p-5"
+      data-testid="lead-form"
+    >
       <div className={`grid gap-4 ${compact ? "" : "sm:grid-cols-2"}`}>
-        <Field label="Name *" name="name" required />
-        <Field label="Phone *" name="phone" required type="tel" />
+        <Field label="Name *" name="name" required testId="lead-form-name" />
+        <Field
+          label="Phone *"
+          name="phone"
+          required
+          type="tel"
+          testId="lead-form-phone"
+        />
         {!compact ? (
           <>
-            <Field label="Email" name="email" type="email" />
-            <Field label="City" name="city" />
-            <Field label="Company" name="company" />
-            <Field label="Product you pack" name="productToPack" />
+            <Field label="Email" name="email" type="email" testId="lead-form-email" />
+            <Field label="City" name="city" testId="lead-form-city" />
+            <Field label="Company" name="company" testId="lead-form-company" />
+            <Field
+              label="Product you pack"
+              name="productToPack"
+              testId="lead-form-product-to-pack"
+            />
           </>
         ) : null}
       </div>
@@ -91,6 +106,7 @@ export function LeadForm({
           name="message"
           rows={compact ? 3 : 4}
           defaultValue={defaultMessage}
+          data-testid="lead-form-message"
           className="w-full border border-border bg-surface px-3 py-2 text-ink"
         />
       </label>
@@ -98,6 +114,7 @@ export function LeadForm({
       <button
         type="submit"
         disabled={status === "loading"}
+        data-testid="lead-form-submit"
         className="mt-5 rounded bg-amber px-5 py-3 text-sm font-semibold text-amber-ink disabled:opacity-60"
       >
         {status === "loading" ? "Sending…" : submitLabel}
@@ -111,11 +128,13 @@ function Field({
   name,
   required,
   type = "text",
+  testId,
 }: {
   label: string;
   name: string;
   required?: boolean;
   type?: string;
+  testId?: string;
 }) {
   return (
     <label className="block text-sm">
@@ -124,6 +143,7 @@ function Field({
         name={name}
         type={type}
         required={required}
+        data-testid={testId}
         className="w-full border border-border bg-surface px-3 py-2 text-ink"
       />
     </label>
