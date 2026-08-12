@@ -151,17 +151,37 @@ function relRef(value: unknown): TaxonomyRef | null {
   return null;
 }
 
+function mediaUrl(media: unknown): {
+  url: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+} | null {
+  if (!media || typeof media !== "object") return null;
+  const m = media as Record<string, unknown>;
+  const url = typeof m.url === "string" ? m.url : "";
+  if (!url) return null;
+  return {
+    url,
+    alt: typeof m.alt === "string" ? m.alt : undefined,
+    width: typeof m.width === "number" ? m.width : undefined,
+    height: typeof m.height === "number" ? m.height : undefined,
+  };
+}
+
 function mapImages(images: unknown): ProductImage[] {
   if (!Array.isArray(images)) return [];
   return images
     .map((img, idx) => {
       const i = img as Record<string, unknown>;
+      const fromMedia = mediaUrl(i.media);
+      const url = fromMedia?.url || String(i.url ?? "");
       return {
         id: typeof i.id === "string" ? i.id : undefined,
-        url: String(i.url ?? ""),
-        alt: String(i.alt ?? ""),
-        width: Number(i.width ?? 0) || undefined,
-        height: Number(i.height ?? 0) || undefined,
+        url,
+        alt: String(i.alt || fromMedia?.alt || ""),
+        width: Number(i.width ?? fromMedia?.width ?? 0) || undefined,
+        height: Number(i.height ?? fromMedia?.height ?? 0) || undefined,
         isPrimary: Boolean(i.isPrimary),
         sortOrder: Number(i.sortOrder ?? idx),
       };

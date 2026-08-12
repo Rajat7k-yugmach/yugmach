@@ -145,7 +145,8 @@ Collections (all under `src/collections/`):
 | `applications` | SEO application pages |
 | `industries` | Industry pages |
 | `spec-fields` | Spec registry |
-| `products` | Machines (prices in **paise**, images as URL array pointing at `/machines/...` static files) |
+| `products` | Machines (prices in **paise**; images: Media upload via Vercel Blob + legacy `/machines/...` URLs) |
+| `media` | Uploaded images (Vercel Blob when `BLOB_READ_WRITE_TOKEN` is set) |
 | `faqs` | Product/application FAQs |
 | `finder-steps` | Machine finder UI steps |
 | `blog-categories` / `blog-posts` | Blog |

@@ -7,61 +7,38 @@ Login → left sidebar **Collections**.
 
 ---
 
-## Important: how images work today (why you see localhost)
+## Important: how images work
 
-There is **no Upload button** yet for product photos.
+**Recommended:** upload in Admin (Media / product Images → Upload). Files go to **Vercel Blob** (CDN). No GitHub push needed.
 
-- Images live as **files** in the website folder: `public/machines/{product-slug}/…`
-- Admin only stores a **path string** in the `url` field.
-- Migration left some URLs like `http://localhost:3000/machines/...` — that is wrong for production.
+**Legacy still works:** site-relative paths like `/machines/{slug}/primary.jpg` under `public/machines/`. Existing products keep working until you replace them.
 
-**Correct URL format (always use this):**
+After **Save**, pages revalidate (usually seconds; hard-refresh if needed).
 
-```text
-/machines/2400-pph-namkeen-packing-machine/primary.jpg
-```
-
-Not `http://localhost:3000/...`.  
-Not a full Vercel URL (site-relative `/machines/...` is best).
-
-After you change a product and click **Save**, the live product page updates via cache revalidation (usually within seconds; hard-refresh if needed).
+**SEO:** Page URLs, titles, and HTML stay the same. Only the image `src` URL may change to a Blob CDN URL — that does **not** hurt rankings. Keep good **Alt** text.
 
 ---
 
-## 1) Change product images
+## 1) Change product images (Admin upload — preferred)
 
-### A. Put the new image file on the site (one-time per new file)
+1. Sidebar → **Products** → open the machine  
+   (Or upload first under **Media**, then attach it on the product.)
+2. Scroll to **Images** → **Add Image** (or edit a row)
+3. **Media** → click upload / choose file (jpg/png/webp)
+4. Fill **Alt** (short description — required for SEO)
+5. **Is Primary** → only one image checked
+6. **Sort Order** → `0`, `1`, `2`, …
+7. Leave **Url** empty if you uploaded Media (it auto-fills on save). Legacy path still OK if you are not uploading yet.
+8. Status = **published** → **Save**
 
-Today this is done in the **code/repo**, not by clicking Upload in admin:
-
-1. On your Mac, open  
-   `/Users/rajatkaushik/YugMach Projects/frontend/public/machines/`
-2. Open (or create) the folder named exactly like the product **slug**  
-   Example: `2400-pph-namkeen-packing-machine`
-3. Add files, e.g.:
-   - `primary.jpg` (main photo)
-   - `gallery-01.jpg`, `gallery-02.jpg`, …
-4. Push to GitHub / redeploy so Vercel serves the new files  
-   (If you only edit the URL in admin to an **existing** file path, no redeploy is needed.)
-
-### B. Point the product at that path in admin
-
-1. Sidebar → **Products**
-2. Open the machine (search by name)
-3. Scroll to **Images** array
-4. For each image row:
-   - **Url** → `/machines/{slug}/primary.jpg` (fix localhost if present)
-   - **Alt** → short description (required)
-   - **Width** / **Height** → e.g. `1200` / `900` (required numbers)
-   - **Is Primary** → check **only one** image
-   - **Sort Order** → `0` for primary, then `1`, `2`, …
-5. Status = **published**
-6. Click **Save**
-
-### Where it shows on the website
+### Where it shows
 
 - `/products/{slug}` gallery + main image  
-- Cards on homepage / listings if that product is featured
+- Cards on homepage / listings if featured
+
+### One-time setup (developer / Vercel)
+
+Blob storage must be connected to the Vercel project so `BLOB_READ_WRITE_TOKEN` exists. If Upload fails in admin, create a **Blob** store on the YugMach Vercel project (Storage → Blob → Create) and redeploy.
 
 ---
 
