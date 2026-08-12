@@ -28,6 +28,7 @@ export const Products: CollectionConfig = {
       url: ({ data }) => {
         if (!data?.slug || typeof data.slug !== "string") return null;
         const base = resolvePayloadServerURL() || "";
+        // Same-origin iframe sends payload session cookie; page verifies via payload.auth()
         return `${base}/products/${data.slug}?preview=1`;
       },
     },
@@ -202,9 +203,19 @@ export const Products: CollectionConfig = {
               if (!next.width) next.width = 1200;
               if (!next.height) next.height = 900;
               return next;
-            } catch {
-              // Orphaned / deleted media ID — clear so admin is not stuck on skeleton
-              return { ...row, media: null };
+            } catch (err) {
+              const message = err instanceof Error ? err.message : String(err);
+              const notFound =
+                /not found|Not Found|No document/i.test(message) ||
+                (typeof err === "object" &&
+                  err !== null &&
+                  "status" in err &&
+                  (err as { status?: number }).status === 404);
+              // Only clear truly missing media — keep relation on transient DB errors
+              if (notFound) {
+                return { ...row, media: null };
+              }
+              return row;
             }
           }),
         );

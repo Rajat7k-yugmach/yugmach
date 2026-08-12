@@ -18,7 +18,7 @@ import { waMessageForProduct } from "@/lib/whatsapp";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ preview?: string }>;
+  searchParams: Promise<{ preview?: string; previewSecret?: string }>;
 };
 
 export async function generateStaticParams() {
@@ -60,10 +60,33 @@ function mtName(mt: string | { slug: string; name: string } | null | undefined):
 
 export default async function ProductPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const { preview } = await searchParams;
+  const { preview, previewSecret } = await searchParams;
   const cookieStore = await cookies();
-  const hasAdminSession = Boolean(cookieStore.get("payload-token")?.value);
-  const allowPreview = preview === "1" && hasAdminSession;
+  const secret = process.env.REVALIDATE_SECRET || process.env.PREVIEW_SECRET || "";
+  const secretOk = Boolean(secret && previewSecret && previewSecret === secret);
+
+  // Prefer signed preview secret. Cookie alone is not enough (can be forged/stale).
+  let sessionOk = false;
+  if (!secretOk && preview === "1") {
+    try {
+      const { getPayload } = await import("@/lib/payload/getPayload");
+      const payload = await getPayload();
+      const cookieHeader = cookieStore
+        .getAll()
+        .map((c) => `${c.name}=${c.value}`)
+        .join("; ");
+      const { user } = await payload.auth({
+        headers: new Headers({
+          cookie: cookieHeader,
+        }),
+      });
+      sessionOk = Boolean(user);
+    } catch {
+      sessionOk = false;
+    }
+  }
+
+  const allowPreview = preview === "1" && (secretOk || sessionOk);
 
   const [product, allProducts] = await Promise.all([
     getProduct(slug, { preview: allowPreview }),

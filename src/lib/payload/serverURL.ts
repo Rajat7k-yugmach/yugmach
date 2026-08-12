@@ -7,6 +7,13 @@ export function resolvePayloadServerURL(): string | undefined {
   const explicit = process.env.PAYLOAD_SERVER_URL?.replace(/\/$/, "");
   if (explicit) return explicit;
 
+  // On preview deployments, VERCEL_URL is this deployment — do NOT prefer
+  // VERCEL_PROJECT_PRODUCTION_URL or cookies/CSRF break across hosts.
+  const vercelEnv = process.env.VERCEL_ENV; // production | preview | development
+  if (vercelEnv === "preview" && process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   }

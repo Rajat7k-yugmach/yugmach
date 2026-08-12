@@ -31,9 +31,12 @@ test.describe("admin write flows", () => {
       timeout: 30_000,
     });
 
-    const firstRow = page.locator("table tbody tr a, .collection-list a").first();
+    const firstRow = page
+      .locator('table tbody tr td a[href*="/admin/collections/blog-posts/"]')
+      .filter({ hasNot: page.locator('[href$="/create"]') })
+      .first();
     await firstRow.click();
-    await page.waitForURL(/\/admin\/collections\/blog-posts\/\w+/);
+    await page.waitForURL(/\/admin\/collections\/blog-posts\/\d+(\?|$)/);
 
     const excerpt = page.locator('textarea[name="excerpt"], input[name="excerpt"]').first();
     if (await excerpt.count()) {
@@ -46,9 +49,9 @@ test.describe("admin write flows", () => {
     await page.getByRole("button", { name: /^save$/i }).click();
 
     await expect(forbidden).toHaveCount(0, { timeout: 15_000 });
-    await expect(page.getByText(/successfully|updated|saved/i).first()).toBeVisible({
-      timeout: 20_000,
-    });
+    await expect(
+      page.locator(".payload-toast-container, [class*='toast']").getByText(/success|updated|saved/i),
+    ).toBeVisible({ timeout: 20_000 });
   });
 
   test("product edit shows specs field and can save", async ({ page }) => {
@@ -58,9 +61,12 @@ test.describe("admin write flows", () => {
       timeout: 30_000,
     });
 
-    const firstRow = page.locator("table tbody tr a, .collection-list a").first();
+    const firstRow = page
+      .locator('table tbody tr td a[href*="/admin/collections/products/"]')
+      .filter({ hasNot: page.locator('[href$="/create"]') })
+      .first();
     await firstRow.click();
-    await page.waitForURL(/\/admin\/collections\/products\/\w+/);
+    await page.waitForURL(/\/admin\/collections\/products\/\d+(\?|$)/);
 
     await expect(page.getByTestId("product-specs-field")).toBeVisible({ timeout: 30_000 });
 
@@ -74,7 +80,9 @@ test.describe("admin write flows", () => {
     await expect(page.getByText(/not allowed to perform this action/i)).toHaveCount(0, {
       timeout: 15_000,
     });
-    await expect(page.getByText(/successfully|updated|saved/i).first()).toBeVisible({
+    await expect(
+      page.locator(".payload-toast-container, [class*='toast']").getByText(/success|updated|saved/i),
+    ).toBeVisible({
       timeout: 20_000,
     });
   });

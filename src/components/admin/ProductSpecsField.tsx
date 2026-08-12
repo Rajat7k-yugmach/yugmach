@@ -133,9 +133,9 @@ export default function ProductSpecsField(props: { path?: string; field?: { labe
   }, [visibleFields]);
 
   const unmappedKeys = useMemo(() => {
-    const known = new Set(registry.map((f) => f.key));
-    return Object.keys(specs).filter((k) => !known.has(k));
-  }, [registry, specs]);
+    const knownVisible = new Set(visibleFields.map((f) => f.key));
+    return Object.keys(specs).filter((k) => !knownVisible.has(k));
+  }, [visibleFields, specs]);
 
   function updateKey(key: string, next: unknown) {
     const copy = { ...specs };
@@ -247,17 +247,37 @@ export default function ProductSpecsField(props: { path?: string; field?: { labe
                       }}
                       data-testid={`spec-${field.key}`}
                     />
+                  ) : field.dataType === "RANGE" || field.dataType === "MULTI" ? (
+                    <textarea
+                      {...common}
+                      rows={3}
+                      value={
+                        current == null
+                          ? ""
+                          : typeof current === "string"
+                            ? current
+                            : JSON.stringify(current, null, 2)
+                      }
+                      onChange={(e) => {
+                        const raw = e.target.value.trim();
+                        if (!raw) {
+                          updateKey(field.key, undefined);
+                          return;
+                        }
+                        try {
+                          updateKey(field.key, JSON.parse(raw));
+                        } catch {
+                          // Keep typing until JSON is valid — store raw string temporarily
+                          updateKey(field.key, raw);
+                        }
+                      }}
+                      data-testid={`spec-${field.key}`}
+                    />
                   ) : (
                     <input
                       {...common}
                       type="text"
-                      value={
-                        current == null
-                          ? ""
-                          : typeof current === "object"
-                            ? JSON.stringify(current)
-                            : String(current)
-                      }
+                      value={current == null ? "" : String(current)}
                       onChange={(e) => updateKey(field.key, e.target.value)}
                       data-testid={`spec-${field.key}`}
                     />
