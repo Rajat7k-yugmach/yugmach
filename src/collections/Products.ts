@@ -2,6 +2,7 @@ import type { CollectionConfig } from "payload";
 
 import { authenticated } from "@/access/authenticated";
 import { authenticatedOrPublished } from "@/access/authenticatedOrPublished";
+import { resolvePayloadServerURL } from "@/lib/payload/serverURL";
 
 async function revalidate(tags: string[]) {
   try {
@@ -17,6 +18,24 @@ export const Products: CollectionConfig = {
   admin: {
     useAsTitle: "name",
     defaultColumns: ["name", "slug", "status", "isFeatured", "pricePaise"],
+    livePreview: {
+      openByDefault: true,
+      breakpoints: [
+        { name: "mobile", label: "Mobile", width: 375, height: 812 },
+        { name: "tablet", label: "Tablet", width: 768, height: 1024 },
+        { name: "desktop", label: "Desktop", width: 1280, height: 800 },
+      ],
+      url: ({ data }) => {
+        if (!data?.slug || typeof data.slug !== "string") return null;
+        const base = resolvePayloadServerURL() || "";
+        return `${base}/products/${data.slug}?preview=1`;
+      },
+    },
+    preview: (doc) => {
+      if (!doc?.slug || typeof doc.slug !== "string") return null;
+      const base = resolvePayloadServerURL() || "";
+      return `${base}/products/${doc.slug}?preview=1`;
+    },
   },
   access: {
     create: authenticated,
@@ -58,7 +77,18 @@ export const Products: CollectionConfig = {
       relationTo: "products",
       hasMany: true,
     },
-    { name: "specs", type: "json", defaultValue: {} },
+    {
+      name: "specs",
+      type: "json",
+      defaultValue: {},
+      admin: {
+        description:
+          "Machine specs shown on the product page. Prefer the labeled fields below — Spec Fields collection defines labels/units.",
+        components: {
+          Field: "@/components/admin/ProductSpecsField",
+        },
+      },
+    },
     { name: "features", type: "json", defaultValue: [] },
     { name: "useCases", type: "json", defaultValue: [] },
     {
@@ -67,7 +97,10 @@ export const Products: CollectionConfig = {
       labels: { singular: "Image", plural: "Images" },
       admin: {
         description:
-          "Prefer Upload (Media). Legacy /machines/... paths still work if url is filled.",
+          "Click Add Image → upload or pick from Media (recommended). If a row shows a grey box forever, clear Media and re-upload. Legacy /machines/... paths still work in Url.",
+        components: {
+          RowLabel: "@/components/admin/ProductImageRowLabel",
+        },
       },
       fields: [
         {
@@ -75,7 +108,7 @@ export const Products: CollectionConfig = {
           type: "upload",
           relationTo: "media",
           admin: {
-            description: "Click to upload or pick an existing image (recommended)",
+            description: "Upload a new file or choose existing Media",
           },
         },
         { name: "cloudinaryId", type: "text", admin: { condition: () => false } },
@@ -170,7 +203,8 @@ export const Products: CollectionConfig = {
               if (!next.height) next.height = 900;
               return next;
             } catch {
-              return row;
+              // Orphaned / deleted media ID — clear so admin is not stuck on skeleton
+              return { ...row, media: null };
             }
           }),
         );

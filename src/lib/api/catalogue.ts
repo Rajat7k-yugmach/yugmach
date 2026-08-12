@@ -358,13 +358,19 @@ export async function getProducts(query = ""): Promise<ProductListItem[]> {
   return result.docs.map((doc) => mapProductListItem(doc as unknown as Record<string, unknown>));
 }
 
-export async function getProduct(slug: string): Promise<ProductDetail | null> {
+export async function getProduct(
+  slug: string,
+  opts?: { preview?: boolean },
+): Promise<ProductDetail | null> {
   const payload = await getPayload();
+  const where = opts?.preview
+    ? ({ slug: { equals: slug } } as Where)
+    : ({
+        and: [{ slug: { equals: slug } }, { status: { equals: "published" } }],
+      } as Where);
   const result = await payload.find({
     collection: "products",
-    where: {
-      and: [{ slug: { equals: slug } }, { status: { equals: "published" } }],
-    },
+    where,
     limit: 1,
     depth: 2,
     overrideAccess: true,
@@ -682,7 +688,7 @@ export async function getBlogPost(slug: string) {
       and: [{ slug: { equals: slug } }, { status: { equals: "published" } }],
     },
     limit: 1,
-    depth: 0,
+    depth: 1,
     overrideAccess: true,
   });
   const doc = result.docs[0];
@@ -698,6 +704,14 @@ export async function getBlogPost(slug: string) {
     authorName: String(doc.authorName ?? "YugMach"),
     readingMins: Number(doc.readingMins ?? 5),
     publishedAt: doc.publishedAt ? String(doc.publishedAt) : null,
+    coverImage: (() => {
+      const media = doc.coverMedia;
+      if (media && typeof media === "object" && "url" in media && typeof media.url === "string") {
+        return media.url;
+      }
+      return doc.coverImage ? String(doc.coverImage) : null;
+    })(),
+    coverImageAlt: doc.coverImageAlt ? String(doc.coverImageAlt) : undefined,
   };
 }
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { Check, Factory, FileDown, Package, Wrench, X } from "lucide-react";
 
@@ -15,7 +16,10 @@ import { buildPageMetadata } from "@/lib/seo";
 import { absoluteUrl } from "@/lib/site";
 import { waMessageForProduct } from "@/lib/whatsapp";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ preview?: string }>;
+};
 
 export async function generateStaticParams() {
   try {
@@ -54,9 +58,17 @@ function mtName(mt: string | { slug: string; name: string } | null | undefined):
   return typeof mt === "string" ? mt : mt.name || mt.slug;
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const [product, allProducts] = await Promise.all([getProduct(slug), getProducts().catch(() => [])]);
+  const { preview } = await searchParams;
+  const cookieStore = await cookies();
+  const hasAdminSession = Boolean(cookieStore.get("payload-token")?.value);
+  const allowPreview = preview === "1" && hasAdminSession;
+
+  const [product, allProducts] = await Promise.all([
+    getProduct(slug, { preview: allowPreview }),
+    getProducts().catch(() => []),
+  ]);
   if (!product) notFound();
 
   const mtSlug =
@@ -206,6 +218,16 @@ export default async function ProductPage({ params }: Props) {
       <JsonLd data={offerLd} />
       <JsonLd data={breadcrumbLd} />
       <JsonLd data={faqLd} />
+
+      {allowPreview && (
+        <div
+          className="border-b border-amber bg-amber/15 px-4 py-2 text-center text-sm text-ink"
+          data-testid="product-preview-banner"
+        >
+          Admin preview{product.status !== "published" ? ` · status: ${product.status}` : ""} — not
+          a public index view
+        </div>
+      )}
 
       <div className="border-b border-border bg-surface">
         <div className="mx-auto max-w-6xl px-4 py-4 md:py-6">

@@ -12,7 +12,6 @@ async function revalidate(tags: string[]) {
   }
 }
 
-
 export const BlogPosts: CollectionConfig = {
   slug: "blog-posts",
   admin: {
@@ -33,7 +32,22 @@ export const BlogPosts: CollectionConfig = {
     { name: "excerptHi", type: "text" },
     { name: "content", type: "textarea", required: true },
     { name: "contentHi", type: "textarea" },
-    { name: "coverImage", type: "text" },
+    {
+      name: "coverMedia",
+      type: "upload",
+      relationTo: "media",
+      admin: {
+        description: "Upload or pick a cover image (recommended)",
+      },
+    },
+    {
+      name: "coverImage",
+      type: "text",
+      admin: {
+        description:
+          "Legacy URL/path — auto-filled from Cover Media. You can also paste a path manually.",
+      },
+    },
     { name: "coverImageAlt", type: "text" },
     {
       name: "category",
@@ -57,6 +71,39 @@ export const BlogPosts: CollectionConfig = {
     { name: "publishedAt", type: "date" },
   ],
   hooks: {
+    beforeChange: [
+      async ({ data, req }) => {
+        if (!data) return data;
+        const mediaId =
+          typeof data.coverMedia === "object" && data.coverMedia && "id" in data.coverMedia
+            ? (data.coverMedia as { id: string | number }).id
+            : data.coverMedia;
+
+        if (!mediaId) return data;
+
+        try {
+          const media = await req.payload.findByID({
+            collection: "media",
+            id: mediaId as string | number,
+            depth: 0,
+          });
+          const next = { ...data };
+          if (typeof media?.url === "string" && media.url) {
+            next.coverImage = media.url;
+          }
+          if (
+            (!next.coverImageAlt || next.coverImageAlt === "") &&
+            typeof media?.alt === "string" &&
+            media.alt
+          ) {
+            next.coverImageAlt = media.alt;
+          }
+          return next;
+        } catch {
+          return data;
+        }
+      },
+    ],
     afterChange: [
       ({ doc }) => revalidate(["blog", `blog:${doc.slug}`, "sitemap"]),
     ],

@@ -45,9 +45,13 @@ The old “Dashboard” page is not used — it redirected here on purpose so yo
 | **Products** | `/products` and `/products/{slug}` |
 | **Machine Types** | `/machines` and `/machines/{slug}` |
 | **Blog Posts** | `/blog` and `/blog/{slug}` |
-| **Spec Fields** | Labels/units on product pages (no separate public URL) |
+| **Spec Fields** | Labels/units only (not the numbers). Edit **values** on each **Product → Specs** |
 | **Media** | Image library used by products (and other uploads) |
 | **Applications** | `/packing-machine/{slug}` (SEO landing pages — different from Machine Types) |
+
+### Live product preview
+
+When you open a **Product**, Payload shows a **Live Preview** panel (split screen) with the real `/products/{slug}` page. Use the Preview toggle in the document header if it is hidden. Click **Refresh** / re-save after edits.
 
 ---
 
@@ -110,37 +114,19 @@ That still works. Prefer **Media upload** for all new photos. Do **not** use `ht
 
 ## 2. Update product specs
 
-Use this when capacity, power, fill type, brand, etc. need to change.
+**How Spec Fields relate to Products**
 
-### Edit values on a product
+- **Spec Fields** = the dictionary (key, label, unit, group). Example: key `capacity_pph`, label `Capacity`, unit `PPH`.
+- **Product → Specs** = the values for that machine (`capacity_pph: 2400`).
+- They are linked by **key name**, not a dropdown. Edit values on the product; edit labels in Spec Fields.
+
+### Edit values on a product (recommended)
 
 1. Sidebar → **Products** → open the machine.
-2. Find **Specs** (JSON field).
-3. Edit the values. Keep keys stable when possible.
-
-**Example:**
-
-```json
-{
-  "capacity_pph": 2400,
-  "fill_type": "CUP",
-  "power_kw": 3.5,
-  "brand": "Yug Mach"
-}
-```
-
-4. Tips:
-   - Numbers without quotes: `2400`, `3.5`
-   - Text with quotes: `"CUP"`
-   - Keys should match **Spec Fields** when you want a proper label/unit on the page
-5. Optional related fields on the same product:
-   - **Features** — JSON array of strings  
-     `["SS contact parts", "PLC control"]`
-   - **Use Cases** — same style  
-     `["Namkeen", "Snacks"]`
-6. **Save**.
-7. Check the product page and, if needed, the PDF:  
-   `/api/v1/products/{slug}/spec-sheet.pdf`
+2. Find **Specs** — labeled inputs grouped by Capacity / Filling / Power / etc. (not raw JSON).
+3. Change the numbers/text you need.
+4. **Save**.
+5. Check the product page (Live Preview or `/products/{slug}`).
 
 ### Change how a spec is labeled (unit / group / display name)
 
@@ -181,7 +167,8 @@ This does not change the raw numbers on products — only how they are shown.
 | **Slug** | URL piece only, e.g. `auger-vs-cup-filler` → page `/blog/auger-vs-cup-filler` |
 | **Excerpt** | Short blurb for cards / list |
 | **Content** | Full article body |
-| **Cover Image** | Image path or public URL (you can use a Media/Blob URL after upload) |
+| **Cover Media** | Upload or pick from Media (recommended) |
+| **Cover Image** | Auto-filled from Cover Media (legacy URL/path still OK) |
 | **Cover Image Alt** | Short description of the cover |
 | **Category** | Pick from Blog Categories |
 | **Tags** | JSON array, e.g. `["buying-guide"]` |
@@ -251,7 +238,7 @@ Machine types are pages like Collar Type, Flow Wrap, etc. under `/machines/...`.
 | I want to… | Go to… | Main action |
 |---|---|---|
 | Change machine photos | **Products** → Images → **Media** | Upload + Alt + Is Primary → Save |
-| Change capacity / power / etc. | **Products** → Specs | Edit JSON values → Save |
+| Change capacity / power / etc. | **Products** → Specs | Edit labeled fields → Save |
 | Change “Capacity (PPH)” label | **Spec Fields** | Edit Label / Unit → Save |
 | Change price | **Products** → Price Paise | Rupees × 100 → Save |
 | Write / edit an article | **Blog Posts** | Edit fields → Status published → Save |
@@ -264,6 +251,9 @@ Machine types are pages like Collar Type, Flow Wrap, etc. under `/machines/...`.
 
 | Problem | Fix |
 |---|---|
+| **“You are not allowed to perform this action”** | Session cookie missing on save. Log out → log in again on the **same** admin URL. Do not mix `www.yugmach.com` and `*.vercel.app`. Hard-refresh after login. |
+| **“Failed to fetch”** on Media save | Blob storage or wrong API host. Developer: confirm `BLOB_READ_WRITE_TOKEN` and `PAYLOAD_SERVER_URL` match the admin host. |
+| Grey **skeleton** on product image | Broken Media link or API failed to load Media. Clear the Media field on that row → **Add Image** / re-upload → Save. |
 | Changes not on the website | Confirm **published**, click **Save**, hard-refresh. Wait ~10–30 seconds. |
 | Upload fails | Check file type (jpg/png/webp) and size. Retry. If still failing, tell the developer (Blob token / storage). |
 | Image blank / broken | Re-open product Images, confirm Media is selected or Url is a valid path (not localhost). |

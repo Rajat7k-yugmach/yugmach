@@ -26,6 +26,10 @@ import { SpecFields } from "./collections/SpecFields";
 import { Testimonials } from "./collections/Testimonials";
 import { Users } from "./collections/Users";
 import { SiteSettings } from "./globals/SiteSettings";
+import {
+  resolvePayloadCsrfOrigins,
+  resolvePayloadServerURL,
+} from "./lib/payload/serverURL";
 
 const blobToken = process.env.BLOB_READ_WRITE_TOKEN || "";
 
@@ -33,9 +37,9 @@ const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
 export default buildConfig({
-  serverURL:
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined),
+  // Must match the browser host for /admin — do NOT prefer www.yugmach.com until DNS is live
+  serverURL: resolvePayloadServerURL(),
+  csrf: resolvePayloadCsrfOrigins(),
   admin: {
     user: Users.slug,
     // Lock admin to light theme (OS dark mode was making inputs/panels near-black)
@@ -45,6 +49,13 @@ export default buildConfig({
     },
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    livePreview: {
+      collections: ["products", "blog-posts"],
+      breakpoints: [
+        { name: "mobile", label: "Mobile", width: 375, height: 812 },
+        { name: "desktop", label: "Desktop", width: 1280, height: 800 },
+      ],
     },
     components: {
       views: {

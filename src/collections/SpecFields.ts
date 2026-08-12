@@ -1,7 +1,6 @@
 import type { CollectionConfig } from "payload";
 
 import { authenticated } from "@/access/authenticated";
-import { authenticatedOrPublished } from "@/access/authenticatedOrPublished";
 
 async function revalidate(tags: string[]) {
   try {
@@ -18,10 +17,13 @@ export const SpecFields: CollectionConfig = {
   admin: {
     useAsTitle: "label",
     defaultColumns: ["key", "label", "group", "isActive"],
+    description:
+      "Registry of spec labels/units. Product values are edited on each Product (Specs section) — keys must match.",
   },
   access: {
     create: authenticated,
     delete: authenticated,
+    // Admin ProductSpecsField loads via REST with cookies; public site uses overrideAccess
     read: authenticated,
     update: authenticated,
   },
