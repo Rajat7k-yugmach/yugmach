@@ -107,6 +107,8 @@ export default buildConfig({
       collections: {
         media: {
           prefix: "media",
+          // Serve public Blob CDN URLs directly (avoids broken /api/media/file proxies)
+          disablePayloadAccessControl: true,
         },
       },
       // Bypass Vercel’s ~4.5MB serverless body limit for larger machine photos

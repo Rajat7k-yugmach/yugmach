@@ -2,6 +2,7 @@ import "server-only";
 
 import type { Where } from "payload";
 
+import { toPublicImageSrc } from "@/lib/media";
 import { getPayload } from "@/lib/payload/getPayload";
 
 export type TaxonomyRef = string | { slug: string; name: string };
@@ -175,7 +176,8 @@ function mapImages(images: unknown): ProductImage[] {
     .map((img, idx) => {
       const i = img as Record<string, unknown>;
       const fromMedia = mediaUrl(i.media);
-      const url = fromMedia?.url || String(i.url ?? "");
+      const rawUrl = fromMedia?.url || String(i.url ?? "");
+      const url = toPublicImageSrc(rawUrl) || rawUrl;
       return {
         id: typeof i.id === "string" ? i.id : undefined,
         url,

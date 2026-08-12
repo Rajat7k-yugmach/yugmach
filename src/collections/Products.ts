@@ -190,7 +190,10 @@ export const Products: CollectionConfig = {
                 depth: 0,
               });
               const next = { ...row };
-              if (typeof media?.url === "string" && media.url) next.url = media.url;
+              if (typeof media?.url === "string" && media.url) {
+                const { toBlobPublicUrl } = await import("@/lib/media");
+                next.url = toBlobPublicUrl(media.url) || media.url;
+              }
               if (typeof media?.width === "number") next.width = media.width;
               if (typeof media?.height === "number") next.height = media.height;
               if (

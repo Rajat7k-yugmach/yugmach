@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
         hostname: "*.public.blob.vercel-storage.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "wxuplmmzfb2hrjxz.public.blob.vercel-storage.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "frontend-six-kappa-clmd7dlhna.vercel.app",
+        pathname: "/api/media/**",
+      },
     ],
   },
   async redirects() {
