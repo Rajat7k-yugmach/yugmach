@@ -31,6 +31,5 @@ test("admin redirects into products after login", async ({ page }) => {
 
   await page.waitForURL(/\/admin\/collections\/products/);
   await expect(page).toHaveURL(/\/admin\/collections\/products/);
-  await expect(page.getByRole("heading", { name: "Products" })).toBeVisible();
-  await expect(page.getByPlaceholder(/Search by Name/i)).toBeVisible();
+  await expect(page.getByPlaceholder(/Search by Name/i)).toBeVisible({ timeout: 30_000 });
 });

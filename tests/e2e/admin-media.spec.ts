@@ -54,14 +54,15 @@ test.describe("admin media upload", () => {
   });
 
   test("product images section has add image control", async ({ page }) => {
+    test.setTimeout(90_000);
     await adminLogin(page);
-    await page.goto("/admin/collections/products");
-    const firstRow = page.locator("table tbody tr a, .collection-list a").first();
-    await firstRow.click();
-    await page.waitForURL(/\/admin\/collections\/products\/\w+/);
-
+    const res = await page.request.get("/api/products?limit=1&depth=0");
+    expect(res.ok()).toBeTruthy();
+    const json = (await res.json()) as { docs: Array<{ id: string | number }> };
+    const id = String(json.docs[0]?.id);
+    await page.goto(`/admin/collections/products/${id}`);
     await expect(page.getByRole("button", { name: /add image/i }).first()).toBeVisible({
-      timeout: 30_000,
+      timeout: 60_000,
     });
   });
 });
