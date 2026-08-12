@@ -2,6 +2,9 @@
 
 How to update **product images**, **specs**, **blogs**, and **machine types** from the website admin — no coding required.
 
+**Full field-by-field guide (every collection):** [ADMIN-FIELD-GUIDE.md](./ADMIN-FIELD-GUIDE.md)  
+→ Start there if you are unsure what **Key / Label / Label Hi / Enum Options**, or **Cover Media vs Cover Image**, mean.
+
 ---
 
 ## Before you start
