@@ -6,7 +6,7 @@ import { authenticatedOrPublished } from "@/access/authenticatedOrPublished";
 async function revalidate(tags: string[]) {
   try {
     const { revalidateContent } = await import("@/lib/payload/revalidate");
-    revalidate(tags);
+    revalidateContent(tags);
   } catch {
     // ignore outside Next.js
   }
