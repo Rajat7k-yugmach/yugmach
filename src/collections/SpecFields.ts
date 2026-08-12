@@ -23,7 +23,7 @@ export const SpecFields: CollectionConfig = {
   access: {
     create: authenticated,
     delete: authenticated,
-    // Admin ProductSpecsField loads via REST with cookies; public site uses overrideAccess
+    // Public site uses overrideAccess; admin UI needs authenticated read
     read: authenticated,
     update: authenticated,
   },
