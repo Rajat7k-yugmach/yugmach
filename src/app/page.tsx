@@ -192,6 +192,11 @@ export default async function HomePage() {
             >
               <HomeMachineFinder
                 applications={apps.map((a) => ({ slug: a.slug, name: a.name }))}
+                products={products.map((p) => ({
+                  slug: p.slug,
+                  name: p.name,
+                  priceDisplay: p.priceDisplay,
+                }))}
                 steps={steps}
                 highlighted
               />

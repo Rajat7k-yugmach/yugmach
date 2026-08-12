@@ -9,9 +9,6 @@ import {
   ChevronLeft,
   Compass,
   Search,
-  Truck,
-  Video,
-  BadgeIndianRupee,
 } from "lucide-react";
 
 import {
@@ -32,6 +29,12 @@ import { cn } from "@/lib/utils";
 
 type AppOption = { slug: string; name: string };
 
+type ProductSearchItem = {
+  slug: string;
+  name: string;
+  priceDisplay?: string | null;
+};
+
 type FinderOption = { id: string; label: string; min?: number; max?: number };
 
 type FinderStepDto = {
@@ -51,6 +54,8 @@ type FinderStepDto = {
 
 type Props = {
   applications: AppOption[];
+  /** Machines available for name search on the homepage finder */
+  products?: ProductSearchItem[];
   steps?: FinderStepDto[];
   compact?: boolean;
   /** Stronger visual weight on homepage hero */
@@ -286,8 +291,159 @@ function OtherDetailInput({
   );
 }
 
+function normalizeSearch(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function MachineNameSearch({
+  products,
+  highlighted,
+}: {
+  products: ProductSearchItem[];
+  highlighted?: boolean;
+}) {
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  const results = useMemo(() => {
+    const q = normalizeSearch(query);
+    if (q.length < 2) return [];
+    const tokens = q.split(" ").filter(Boolean);
+    const scored = products
+      .map((p) => {
+        const hay = normalizeSearch(`${p.name} ${p.slug}`);
+        if (!tokens.every((t) => hay.includes(t))) return null;
+        const starts = hay.startsWith(q) ? 2 : 0;
+        const early = hay.indexOf(tokens[0]!) <= 8 ? 1 : 0;
+        return { product: p, score: starts + early };
+      })
+      .filter((x): x is { product: ProductSearchItem; score: number } => Boolean(x))
+      .sort((a, b) => b.score - a.score || a.product.name.localeCompare(b.product.name))
+      .slice(0, 6)
+      .map((x) => x.product);
+    return scored;
+  }, [products, query]);
+
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, []);
+
+  function goToProduct(slug: string) {
+    setOpen(false);
+    router.push(`/products/${slug}`);
+  }
+
+  function runSearch() {
+    if (results[0]) {
+      goToProduct(results[0].slug);
+      return;
+    }
+    const q = query.trim();
+    if (q) router.push(`/products?q=${encodeURIComponent(q)}`);
+  }
+
+  if (!products.length) return null;
+
+  return (
+    <div ref={wrapRef} className="relative" data-testid="machine-name-search">
+      <div className="relative">
+        <Search
+          className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-ink-muted"
+          aria-hidden
+        />
+        <Input
+          value={query}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            setOpen(true);
+          }}
+          onFocus={() => setOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.stopPropagation();
+              runSearch();
+            }
+          }}
+          placeholder="Search by machine name…"
+          aria-label="Search machines by name"
+          autoComplete="off"
+          data-testid="machine-name-search-input"
+          className={cn(
+            "border-border bg-surface-sunken/60 text-ink shadow-none placeholder:text-ink-muted",
+            "focus-visible:border-amber focus-visible:bg-white focus-visible:ring-amber/20",
+            "pl-10 pr-3",
+            highlighted ? "h-12 rounded-xl text-base" : "h-11 rounded-xl text-base",
+          )}
+        />
+      </div>
+
+      {open && normalizeSearch(query).length >= 2 ? (
+        <div
+          className="absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-border bg-white shadow-lg ring-1 ring-black/5"
+          data-testid="machine-name-search-results"
+        >
+          {results.length ? (
+            <ul className="max-h-64 overflow-y-auto py-1">
+              {results.map((p) => (
+                <li key={p.slug}>
+                  <button
+                    type="button"
+                    data-testid={`machine-name-result-${p.slug}`}
+                    onClick={() => goToProduct(p.slug)}
+                    className="flex w-full items-start justify-between gap-3 px-3.5 py-2.5 text-left transition hover:bg-amber/10"
+                  >
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-ink">
+                        {p.name}
+                      </span>
+                      {p.priceDisplay ? (
+                        <span className="mt-0.5 block text-xs text-ink-muted">
+                          {p.priceDisplay}
+                        </span>
+                      ) : null}
+                    </span>
+                    <ArrowRight className="mt-1 size-3.5 shrink-0 text-amber-text" aria-hidden />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="px-3.5 py-3 text-sm text-ink-muted">
+              No machine matched. Try “masala”, “dhaniya”, or pick below.
+            </p>
+          )}
+          <div className="border-t border-border px-3.5 py-2">
+            <button
+              type="button"
+              onClick={() => {
+                const q = query.trim();
+                if (q) router.push(`/products?q=${encodeURIComponent(q)}`);
+              }}
+              className="text-xs font-semibold text-trust hover:underline"
+            >
+              Browse all machines →
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function HomeMachineFinder({
   applications,
+  products = [],
   steps: stepsProp,
   compact = false,
   highlighted = false,
@@ -413,7 +569,7 @@ export function HomeMachineFinder({
           </span>
           <div>
             <p className="text-sm font-semibold text-ink">Find your machine</p>
-            <p className="text-xs text-ink-muted">Matched in under a minute</p>
+            <p className="text-xs text-ink-muted">Search by name or answer below</p>
           </div>
         </div>
         <div className="text-right">
@@ -440,9 +596,25 @@ export function HomeMachineFinder({
         />
       </div>
 
+      {highlighted && products.length ? (
+        <div className="mt-5">
+          <MachineNameSearch products={products} highlighted={highlighted} />
+          <div className="my-4 flex items-center gap-3" aria-hidden>
+            <span className="h-px flex-1 bg-border" />
+            <span className="text-[11px] font-semibold tracking-wide text-ink-muted uppercase">
+              or pick what you pack
+            </span>
+            <span className="h-px flex-1 bg-border" />
+          </div>
+        </div>
+      ) : null}
+
       <div
         key={current.key}
-        className="mt-5 animate-in fade-in-0 slide-in-from-right-1 duration-200"
+        className={cn(
+          "animate-in fade-in-0 slide-in-from-right-1 duration-200",
+          highlighted && products.length ? "mt-0" : "mt-5",
+        )}
       >
         <h2
           className={`font-semibold tracking-tight text-ink ${
@@ -550,35 +722,6 @@ export function HomeMachineFinder({
           />
         </button>
       </div>
-
-      {highlighted ? (
-        <ul className="mt-5 grid gap-2.5 border-t border-border pt-4">
-          {[
-            {
-              Icon: BadgeIndianRupee,
-              text: "Published prices — no blank quotes",
-            },
-            {
-              Icon: Video,
-              text: "Demo with your material on WhatsApp",
-            },
-            {
-              Icon: Truck,
-              text: "India-wide delivery & install support",
-            },
-          ].map(({ Icon, text }) => (
-            <li
-              key={text}
-              className="flex items-start gap-2.5 text-sm text-ink-muted"
-            >
-              <span className="mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-md bg-amber/12 text-amber-text">
-                <Icon className="size-3.5" aria-hidden />
-              </span>
-              <span>{text}</span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
 
       <Link
         href="/advisor"
