@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -13,7 +14,6 @@ import { CategoryMarquee } from "@/components/CategoryMarquee";
 import { CoverageTrustSection } from "@/components/CoverageTrustSection";
 import { HeroApplicationMosaic } from "@/components/HeroApplicationMosaic";
 import { HeroMetrics } from "@/components/HeroMetrics";
-import { HomeMachineFinder } from "@/components/HomeMachineFinder";
 import { ProductCard } from "@/components/ProductCard";
 import { StickyCtaBar } from "@/components/StickyCtaBar";
 import { WhatsAppButton } from "@/components/WhatsAppButton";
@@ -29,6 +29,23 @@ import { waMessageGeneric } from "@/lib/whatsapp";
 
 /** Demand-led mosaic order (reviews mention spice / namkeen most). */
 const MOSAIC_PREFERRED = ["masala", "namkeen", "powder", "snacks", "kurkure", "biscuit"];
+
+/** Code-split the heavy finder (cmdk/popover) out of the initial JS chunk. */
+const HomeMachineFinder = dynamic(
+  () =>
+    import("@/components/HomeMachineFinder").then((m) => m.HomeMachineFinder),
+  {
+    ssr: true,
+    loading: () => (
+      <div
+        className="h-[28rem] animate-pulse rounded-2xl border border-border bg-white shadow-[0_12px_36px_rgba(15,23,42,0.07)]"
+        aria-hidden
+      />
+    ),
+  },
+);
+
+export const revalidate = 300;
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Packing Machine Price in India — Published Rates",
@@ -57,7 +74,9 @@ export default async function HomePage() {
     getFinderSteps().catch(() => []),
   ]);
 
-  const steps = finderSteps as Parameters<typeof HomeMachineFinder>[0]["steps"];
+  const steps = finderSteps as Parameters<
+    typeof import("@/components/HomeMachineFinder").HomeMachineFinder
+  >[0]["steps"];
 
   const heroProduct =
     products.find((p) => p.slug === "2400-pph-namkeen-packing-machine") ||
@@ -192,11 +211,6 @@ export default async function HomePage() {
             >
               <HomeMachineFinder
                 applications={apps.map((a) => ({ slug: a.slug, name: a.name }))}
-                products={products.map((p) => ({
-                  slug: p.slug,
-                  name: p.name,
-                  priceDisplay: p.priceDisplay,
-                }))}
                 steps={steps}
                 highlighted
               />
@@ -253,9 +267,9 @@ export default async function HomePage() {
             </Link>
           </div>
           <ul className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-            {featured.map((p) => (
+            {featured.map((p, i) => (
               <li key={p.slug} className="reveal h-full">
-                <ProductCard product={p} showPouch={false} />
+                <ProductCard product={p} showPouch={false} priority={i === 0} />
               </li>
             ))}
           </ul>

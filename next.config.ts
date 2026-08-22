@@ -3,6 +3,7 @@ import { withPayload } from "@payloadcms/next/withPayload";
 
 const nextConfig: NextConfig = {
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",
@@ -29,7 +30,39 @@ const nextConfig: NextConfig = {
         hostname: "frontend-six-kappa-clmd7dlhna.vercel.app",
         pathname: "/api/media/**",
       },
+      {
+        protocol: "https",
+        hostname: "www.yugmach.com",
+        pathname: "/api/media/**",
+      },
+      {
+        protocol: "https",
+        hostname: "yugmach.com",
+        pathname: "/api/media/**",
+      },
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: "/machines/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/brand-logo.png",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
+    ];
   },
   async redirects() {
     return [

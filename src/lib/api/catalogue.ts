@@ -1,5 +1,6 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
 import type { Where } from "payload";
 
 import { toPublicImageSrc } from "@/lib/media";
@@ -343,6 +344,17 @@ function parseProductQuery(query: string): Where {
 }
 
 export async function getProducts(query = ""): Promise<ProductListItem[]> {
+  if (query) {
+    return getProductsUncached(query);
+  }
+  return unstable_cache(
+    () => getProductsUncached(""),
+    ["catalogue-products-published"],
+    { tags: ["products"], revalidate: 300 },
+  )();
+}
+
+async function getProductsUncached(query = ""): Promise<ProductListItem[]> {
   const payload = await getPayload();
   const where = query
     ? parseProductQuery(query)
@@ -358,6 +370,24 @@ export async function getProducts(query = ""): Promise<ProductListItem[]> {
   });
 
   return result.docs.map((doc) => mapProductListItem(doc as unknown as Record<string, unknown>));
+}
+
+/** Slim index for homepage machine-name search (cached). */
+export async function getProductSearchIndex(): Promise<
+  Array<{ slug: string; name: string; priceDisplay: string | null }>
+> {
+  return unstable_cache(
+    async () => {
+      const products = await getProductsUncached("");
+      return products.map((p) => ({
+        slug: p.slug,
+        name: p.name,
+        priceDisplay: p.priceDisplay,
+      }));
+    },
+    ["catalogue-product-search-index"],
+    { tags: ["products"], revalidate: 300 },
+  )();
 }
 
 export async function getProduct(
@@ -430,57 +460,63 @@ export async function getProduct(
 }
 
 export async function getApplications(): Promise<Application[]> {
-  const payload = await getPayload();
-  const result = await payload.find({
-    collection: "applications",
-    where: { status: { equals: "published" } },
-    limit: 100,
-    depth: 0,
-    sort: "sortOrder",
-    overrideAccess: true,
-  });
+  return unstable_cache(
+    async () => {
+      const payload = await getPayload();
+      const result = await payload.find({
+        collection: "applications",
+        where: { status: { equals: "published" } },
+        limit: 100,
+        depth: 0,
+        sort: "sortOrder",
+        overrideAccess: true,
+      });
 
-  const products = await getProducts();
-  return result.docs.map((doc) => {
-    const slug = String(doc.slug);
-    const related = products.filter((p) =>
-      (p.applications ?? []).some((a) => relSlug(a) === slug),
-    );
-    const prices = related
-      .map((p) => p.pricePaise)
-      .filter((p): p is number => typeof p === "number");
-    const min = prices.length ? Math.min(...prices) : null;
-    const max = prices.length ? Math.max(...prices) : null;
-    return enrichApplication({
-      id: String(doc.id),
-      slug,
-      name: String(doc.name),
-      nameHi: doc.nameHi ? String(doc.nameHi) : "",
-      h1: String(doc.h1),
-      h1Hi: doc.h1Hi ? String(doc.h1Hi) : "",
-      intro: String(doc.intro ?? ""),
-      introHi: doc.introHi ? String(doc.introHi) : "",
-      body: String(doc.body ?? ""),
-      bodyHi: doc.bodyHi ? String(doc.bodyHi) : "",
-      productChallenges: String(doc.productChallenges ?? ""),
-      recommendedFillType: doc.recommendedFillType
-        ? String(doc.recommendedFillType)
-        : undefined,
-      typicalPouchSizes: Array.isArray(doc.typicalPouchSizes)
-        ? (doc.typicalPouchSizes as string[])
-        : [],
-      typicalFilmTypes: Array.isArray(doc.typicalFilmTypes)
-        ? (doc.typicalFilmTypes as string[])
-        : [],
-      heroImage: doc.heroImage ? String(doc.heroImage) : undefined,
-      status: String(doc.status),
-      products: related,
-      productCount: related.length,
-      priceMinPaise: min,
-      priceMaxPaise: max,
-      priceRangePaise: { min_price: min, max_price: max },
-    });
-  });
+      const products = await getProductsUncached("");
+      return result.docs.map((doc) => {
+        const slug = String(doc.slug);
+        const related = products.filter((p) =>
+          (p.applications ?? []).some((a) => relSlug(a) === slug),
+        );
+        const prices = related
+          .map((p) => p.pricePaise)
+          .filter((p): p is number => typeof p === "number");
+        const min = prices.length ? Math.min(...prices) : null;
+        const max = prices.length ? Math.max(...prices) : null;
+        return enrichApplication({
+          id: String(doc.id),
+          slug,
+          name: String(doc.name),
+          nameHi: doc.nameHi ? String(doc.nameHi) : "",
+          h1: String(doc.h1),
+          h1Hi: doc.h1Hi ? String(doc.h1Hi) : "",
+          intro: String(doc.intro ?? ""),
+          introHi: doc.introHi ? String(doc.introHi) : "",
+          body: String(doc.body ?? ""),
+          bodyHi: doc.bodyHi ? String(doc.bodyHi) : "",
+          productChallenges: String(doc.productChallenges ?? ""),
+          recommendedFillType: doc.recommendedFillType
+            ? String(doc.recommendedFillType)
+            : undefined,
+          typicalPouchSizes: Array.isArray(doc.typicalPouchSizes)
+            ? (doc.typicalPouchSizes as string[])
+            : [],
+          typicalFilmTypes: Array.isArray(doc.typicalFilmTypes)
+            ? (doc.typicalFilmTypes as string[])
+            : [],
+          heroImage: doc.heroImage ? String(doc.heroImage) : undefined,
+          status: String(doc.status),
+          products: related,
+          productCount: related.length,
+          priceMinPaise: min,
+          priceMaxPaise: max,
+          priceRangePaise: { min_price: min, max_price: max },
+        });
+      });
+    },
+    ["catalogue-applications-published"],
+    { tags: ["applications", "products"], revalidate: 300 },
+  )();
 }
 
 export async function getApplication(slug: string): Promise<Application | null> {
@@ -726,27 +762,33 @@ export async function getBlogPost(slug: string) {
 }
 
 export async function getTestimonials() {
-  const payload = await getPayload();
-  const result = await payload.find({
-    collection: "testimonials",
-    limit: 200,
-    depth: 0,
-    sort: "-createdAt",
-    overrideAccess: true,
-  });
-  return result.docs.map((doc) => ({
-    id: String(doc.id),
-    customerName: String(doc.customerName),
-    text: String(doc.text),
-    textHi: doc.textHi ? String(doc.textHi) : undefined,
-    rating: Number(doc.rating ?? 5),
-    source: String(doc.source ?? "direct"),
-    sourceUrl: doc.sourceUrl ? String(doc.sourceUrl) : undefined,
-    city: String(doc.city ?? ""),
-    company: doc.company ? String(doc.company) : undefined,
-    isVerified: Boolean(doc.isVerified),
-    isFeatured: Boolean(doc.isFeatured),
-  }));
+  return unstable_cache(
+    async () => {
+      const payload = await getPayload();
+      const result = await payload.find({
+        collection: "testimonials",
+        limit: 200,
+        depth: 0,
+        sort: "-createdAt",
+        overrideAccess: true,
+      });
+      return result.docs.map((doc) => ({
+        id: String(doc.id),
+        customerName: String(doc.customerName),
+        text: String(doc.text),
+        textHi: doc.textHi ? String(doc.textHi) : undefined,
+        rating: Number(doc.rating ?? 5),
+        source: String(doc.source ?? "direct"),
+        sourceUrl: doc.sourceUrl ? String(doc.sourceUrl) : undefined,
+        city: String(doc.city ?? ""),
+        company: doc.company ? String(doc.company) : undefined,
+        isVerified: Boolean(doc.isVerified),
+        isFeatured: Boolean(doc.isFeatured),
+      }));
+    },
+    ["catalogue-testimonials"],
+    { tags: ["testimonials"], revalidate: 600 },
+  )();
 }
 
 export async function getLocations() {
@@ -876,16 +918,22 @@ export async function getSpareParts() {
 }
 
 export async function getFinderSteps() {
-  const payload = await getPayload();
-  const result = await payload.find({
-    collection: "finder-steps",
-    where: { isActive: { equals: true } },
-    limit: 50,
-    depth: 0,
-    sort: "sortOrder",
-    overrideAccess: true,
-  });
-  return result.docs;
+  return unstable_cache(
+    async () => {
+      const payload = await getPayload();
+      const result = await payload.find({
+        collection: "finder-steps",
+        where: { isActive: { equals: true } },
+        limit: 50,
+        depth: 0,
+        sort: "sortOrder",
+        overrideAccess: true,
+      });
+      return result.docs;
+    },
+    ["catalogue-finder-steps"],
+    { tags: ["finder-steps"], revalidate: 600 },
+  )();
 }
 
 export async function getSitemapFeed() {

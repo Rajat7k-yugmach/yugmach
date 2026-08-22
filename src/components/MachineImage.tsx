@@ -92,8 +92,9 @@ export function MachineImage({
       />
     );
   }
+  // Local/static paths skip the optimizer; remote Blob/CDN URLs go through
+  // next/image so LCP candidates get resized WebP/AVIF variants.
   const isLocal = localSrc.startsWith("/");
-  const isBlob = localSrc.includes("blob.vercel-storage.com");
 
   return (
     <div className={`relative aspect-[4/3] overflow-hidden bg-surface-sunken ${className}`}>
@@ -104,7 +105,7 @@ export function MachineImage({
         className="object-contain p-2 md:p-3"
         sizes={sizes}
         priority={priority}
-        unoptimized={isLocal || isBlob}
+        unoptimized={isLocal}
       />
     </div>
   );

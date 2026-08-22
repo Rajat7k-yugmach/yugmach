@@ -23,9 +23,15 @@ type Props = {
   /** @deprecated pouch row removed for catalogue density */
   showPouch?: boolean;
   hrefPrefix?: string;
+  /** Prioritize LCP image for the first above-the-fold card */
+  priority?: boolean;
 };
 
-export function ProductCard({ product, hrefPrefix = "/products" }: Props) {
+export function ProductCard({
+  product,
+  hrefPrefix = "/products",
+  priority = false,
+}: Props) {
   const cap = capacityHint(product);
   const mt = mtSlug(product);
 
@@ -45,6 +51,8 @@ export function ProductCard({ product, hrefPrefix = "/products" }: Props) {
           capacityHint={cap}
           machineType={mt}
           className="rounded-none border-b border-border"
+          priority={priority}
+          sizes="(max-width: 768px) 50vw, 25vw"
         />
       </Link>
       <div className="flex min-h-0 flex-1 flex-col p-3.5">

@@ -300,16 +300,35 @@ function normalizeSearch(s: string) {
 }
 
 function MachineNameSearch({
-  products,
+  products: productsProp = [],
   highlighted,
 }: {
-  products: ProductSearchItem[];
+  products?: ProductSearchItem[];
   highlighted?: boolean;
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
+  const [catalog, setCatalog] = useState<ProductSearchItem[]>(productsProp);
+  const [indexLoaded, setIndexLoaded] = useState(productsProp.length > 0);
   const wrapRef = useRef<HTMLDivElement>(null);
+
+  const products = catalog.length ? catalog : productsProp;
+
+  async function ensureIndex() {
+    if (indexLoaded && catalog.length) return;
+    try {
+      const res = await fetch("/api/v1/product-search-index", {
+        credentials: "same-origin",
+      });
+      if (!res.ok) return;
+      const json = (await res.json()) as { results?: ProductSearchItem[] };
+      setCatalog(json.results || []);
+      setIndexLoaded(true);
+    } catch {
+      // Keep optional props fallback
+    }
+  }
 
   const results = useMemo(() => {
     const q = normalizeSearch(query);
@@ -352,8 +371,6 @@ function MachineNameSearch({
     if (q) router.push(`/products?q=${encodeURIComponent(q)}`);
   }
 
-  if (!products.length) return null;
-
   return (
     <div ref={wrapRef} className="relative" data-testid="machine-name-search">
       <div className="relative">
@@ -367,7 +384,10 @@ function MachineNameSearch({
             setQuery(e.target.value);
             setOpen(true);
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            setOpen(true);
+            void ensureIndex();
+          }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               e.preventDefault();
@@ -420,7 +440,9 @@ function MachineNameSearch({
             </ul>
           ) : (
             <p className="px-3.5 py-3 text-sm text-ink-muted">
-              No machine matched. Try “masala”, “dhaniya”, or pick below.
+              {indexLoaded
+                ? "No machine matched. Try “masala”, “dhaniya”, or pick below."
+                : "Loading machines…"}
             </p>
           )}
           <div className="border-t border-border px-3.5 py-2">
@@ -596,7 +618,7 @@ export function HomeMachineFinder({
         />
       </div>
 
-      {highlighted && products.length ? (
+      {highlighted ? (
         <div className="mt-5">
           <MachineNameSearch products={products} highlighted={highlighted} />
           <div className="my-4 flex items-center gap-3" aria-hidden>
@@ -613,7 +635,7 @@ export function HomeMachineFinder({
         key={current.key}
         className={cn(
           "animate-in fade-in-0 slide-in-from-right-1 duration-200",
-          highlighted && products.length ? "mt-0" : "mt-5",
+          highlighted ? "mt-0" : "mt-5",
         )}
       >
         <h2

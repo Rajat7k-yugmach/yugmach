@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { headers } from "next/headers";
 import { Inter, Manrope } from "next/font/google";
 
 import { OrganizationJsonLd } from "@/components/OrganizationJsonLd";
-import { AnalyticsPageviews } from "@/components/AnalyticsPageviews";
 import { AppShell } from "@/components/AppShell";
-import { NavigationProgress } from "@/components/NavigationProgress";
 import { SiteSettingsProvider } from "@/components/SiteSettingsProvider";
 import { getSiteSettings } from "@/lib/api/getSiteSettings";
 import { SITE_URL } from "@/lib/site";
@@ -13,17 +12,29 @@ import { cn } from "@/lib/utils";
 
 import "./globals.css";
 
+const NavigationProgress = dynamic(
+  () =>
+    import("@/components/NavigationProgress").then((m) => m.NavigationProgress),
+  { ssr: false },
+);
+
+const AnalyticsPageviews = dynamic(
+  () =>
+    import("@/components/AnalyticsPageviews").then((m) => m.AnalyticsPageviews),
+  { ssr: false },
+);
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "600", "700"],
   display: "swap",
 });
 
 const manrope = Manrope({
   variable: "--font-manrope",
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["700", "800"],
   display: "swap",
 });
 

@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+
 import { getPayload } from "@/lib/payload/getPayload";
 import {
   SITE_SETTINGS_FALLBACK,
@@ -7,7 +9,7 @@ import {
   type ContactChannel,
 } from "@/lib/api/siteSettings";
 
-export async function getSiteSettings(): Promise<SiteSettings> {
+async function loadSiteSettings(): Promise<SiteSettings> {
   try {
     const payload = await getPayload();
     const settings = await payload.findGlobal({
@@ -51,4 +53,11 @@ export async function getSiteSettings(): Promise<SiteSettings> {
   } catch {
     return SITE_SETTINGS_FALLBACK;
   }
+}
+
+export async function getSiteSettings(): Promise<SiteSettings> {
+  return unstable_cache(loadSiteSettings, ["site-settings"], {
+    tags: ["site-settings"],
+    revalidate: 600,
+  })();
 }
