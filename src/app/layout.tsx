@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { Inter, Manrope } from "next/font/google";
 
 import { OrganizationJsonLd } from "@/components/OrganizationJsonLd";
+import { AnalyticsPageviews } from "@/components/AnalyticsPageviews";
 import { AppShell } from "@/components/AppShell";
 import { NavigationProgress } from "@/components/NavigationProgress";
 import { SiteSettingsProvider } from "@/components/SiteSettingsProvider";
@@ -95,6 +96,7 @@ export default async function RootLayout({
       <body className="flex min-h-screen flex-col antialiased">
         <SiteSettingsProvider value={settings}>
           <NavigationProgress />
+          <AnalyticsPageviews />
           <OrganizationJsonLd settings={settings} />
           <AppShell>{children}</AppShell>
         </SiteSettingsProvider>

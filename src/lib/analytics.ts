@@ -21,8 +21,22 @@ function ensureGtag() {
   s.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
   document.head.appendChild(s);
   window.gtag("js", new Date());
-  window.gtag("config", id);
+  // We send page_view explicitly (incl. SPA route changes) via trackPageview,
+  // so disable gtag's automatic initial pageview to avoid double-counting.
+  window.gtag("config", id, { send_page_view: false });
   return true;
+}
+
+/** Records a page view (initial load + client-side route changes). */
+export function trackPageview(path: string) {
+  if (typeof window === "undefined") return;
+  if (ensureGtag()) {
+    window.gtag?.("event", "page_view", {
+      page_path: path,
+      page_location: window.location.href,
+      page_title: document.title,
+    });
+  }
 }
 
 export function trackEvent(name: string, params?: Record<string, string | number | boolean>) {
