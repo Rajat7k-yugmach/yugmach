@@ -7,6 +7,7 @@ import { AppShell } from "@/components/AppShell";
 import { NavigationProgress } from "@/components/NavigationProgress";
 import { SiteSettingsProvider } from "@/components/SiteSettingsProvider";
 import { getSiteSettings } from "@/lib/api/getSiteSettings";
+import { SITE_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 import "./globals.css";
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
   },
   description:
     "Buy packing machines for namkeen, masala, powder, snacks and more. Published prices, India-wide delivery. Find your machine by product.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   applicationName: "YugMach",
   authors: [{ name: "YugMach" }],
   creator: "YugMach",
